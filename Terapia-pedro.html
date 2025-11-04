@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Espaço Terapêutico - DBT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6b5b95;
+            --secondary: #88b0d3;
+            --accent: #ffb447;
+            --success: #82ca9d;
+            --danger: #f67280;
+            --bg-light: #f8f9fa;
+            --bg-dark: #1a1a2e;
+            --text-light: #333;
+            --text-dark: #f0f0f0;
+            --card-light: #ffffff;
+            --card-dark: #16213e;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        .dark-mode .header {
+            background: rgba(22, 33, 62, 0.95);
+            color: var(--text-dark);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .logo h1 {
+            font-size: 24px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            width: 50px;
+            height: 26px;
+            background: var(--secondary);
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle::after {
+            content: '🌞';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .dark-mode .theme-toggle::after {
+            transform: translateX(24px);
+            content: '🌙';
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .nav-tabs {
+            background: rgba(22, 33, 62, 0.9);
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-tab:hover {
+            background: rgba(107, 91, 149, 0.1);
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .content-area {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            min-height: 500px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .content-area {
+            background: rgba(22, 33, 62, 0.95);
+            color: var(--text-dark);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dashboard Styles */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .dashboard-card {
+            background: linear-gradient(135deg, #2d3561 0%, #1e2749 100%);
+        }
+
+        .mood-tracker {
+            text-align: center;
+        }
+
+        .mood-scale {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+
+        .mood-emoji {
+            font-size: 35px;
+            cursor: pointer;
+            transition: all 0.3s;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .mood-emoji:hover {
+            transform: scale(1.2);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .mood-emoji.selected {
+            background: var(--accent);
+            transform: scale(1.1);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        .dark-mode label {
+            color: var(--secondary);
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .dark-mode input,
+        .dark-mode textarea,
+        .dark-mode select {
+            background: var(--bg-dark);
+            color: var(--text-dark);
+            border-color: #3a3a3a;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(107, 91, 149, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(107, 91, 149, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+        }
+
+        .btn-success {
+            background: var(--success);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        /* Routine Timeline */
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .timeline-time {
+            width: 80px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .timeline-content {
+            flex: 1;
+            background: rgba(136, 176, 211, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-left: 20px;
+            border-left: 3px solid var(--secondary);
+        }
+
+        .timeline-content.completed {
+            background: rgba(130, 202, 157, 0.2);
+            border-left-color: var(--success);
+        }
+
+        /* Emotion Cards */
+        .emotion-log {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .dark-mode .emotion-log {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Skills Section */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .skill-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dark-mode .skill-card {
+            background: var(--card-dark);
+        }
+
+        .skill-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .skill-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .skill-badge {
+            background: var(--accent);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        /* Mindfulness Timer */
+        .timer-display {
+            font-size: 48px;
+            font-weight: bold;
+            text-align: center;
+            margin: 30px 0;
+            color: var(--primary);
+        }
+
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        /* Rewards */
+        .rewards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .reward-item {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .reward-item:hover {
+            transform: scale(1.05);
+        }
+
+        .reward-item.claimed {
+            opacity: 0.5;
+            background: #dfe6e9;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--accent));
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s;
+        }
+
+        .dark-mode .modal-content {
+            background: var(--card-dark);
+            color: var(--text-dark);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-modal {
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-tabs {
+                justify-content: center;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        .celebration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 100px;
+            animation: celebrate 1s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes celebrate {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(2);
+                opacity: 0;
+            }
+        }
+
+        /* Notes Section */
+        .note-card {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+
+        .dark-mode .note-card {
+            background: rgba(255, 193, 7, 0.2);
+        }
+
+        .note-date {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">🌱</div>
+                <h1>Meu Espaço Terapêutico</h1>
+            </div>
+            <div class="header-controls">
+                <span id="currentDate"></span>
+                <div class="theme-toggle" onclick="toggleTheme()"></div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="dashboard" onclick="switchTab('dashboard', this)">
+                <span>📊</span> Dashboard
+            </button>
+            <button class="nav-tab" data-tab="emotions" onclick="switchTab('emotions', this)">
+                <span>💭</span> Emoções
+            </button>
+            <button class="nav-tab" data-tab="routine" onclick="switchTab('routine', this)">
+                <span>📅</span> Rotina
+            </button>
+            <button class="nav-tab" data-tab="skills" onclick="switchTab('skills', this)">
+                <span>🛠️</span> Habilidades DBT
+            </button>
+            <button class="nav-tab" data-tab="mindfulness" onclick="switchTab('mindfulness', this)">
+                <span>🧘</span> Mindfulness
+            </button>
+            <button class="nav-tab" data-tab="notes" onclick="switchTab('notes', this)">
+                <span>📝</span> Anotações
+            </button>
+            <button class="nav-tab" data-tab="rewards" onclick="switchTab('rewards', this)">
+                <span>🏆</span> Recompensas
+            </button>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <h2>Bem-vindo de volta! Como você está hoje?</h2>
+                
+                <div class="dashboard-grid">
+                    <div class="dashboard-card mood-tracker">
+                        <h3>Registro de Humor</h3>
+                        <div class="mood-scale">
+                            <span class="mood-emoji" onclick="selectMood(1, this)">😔</span>
+                            <span class="mood-emoji" onclick="selectMood(2, this)">😕</span>
+                            <span class="mood-emoji" onclick="selectMood(3, this)">😐</span>
+                            <span class="mood-emoji" onclick="selectMood(4, this)">🙂</span>
+                            <span class="mood-emoji" onclick="selectMood(5, this)">😊</span>
+                        </div>
+                        <button class="btn btn-success" onclick="saveMood()">Registrar Humor</button>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>Progresso do Dia</h3>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="dailyProgress" style="width: 0%">0%</div>
+                        </div>
+                        <p>Atividades completadas: <span id="completedCount">0</span>/8</p>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>Última Prática</h3>
+                        <p>🧘 Mindfulness: <span id="lastMindfulness">Não registrado</span></p>
+                        <p>💊 Medicação: <span id="lastMedication">Não registrado</span></p>
+                        <p>🏃 Exercício: <span id="lastExercise">Não registrado</span></p>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <h3>Resumo da Semana</h3>
+                    <canvas id="weekChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Emotions Tab -->
+            <div id="emotions" class="tab-content">
+                <h2>Observar e Descrever Emoções</h2>
+                
+                <div class="form-group">
+                    <label>Que emoção você está sentindo agora?</label>
+                    <select id="emotionType">
+                        <option value="">Selecione...</option>
+                        <option value="alegria">Alegria</option>
+                        <option value="tristeza">Tristeza</option>
+                        <option value="raiva">Raiva</option>
+                        <option value="medo">Medo</option>
+                        <option value="ansiedade">Ansiedade</option>
+                        <option value="calma">Calma</option>
+                        <option value="frustração">Frustração</option>
+                        <option value="esperança">Esperança</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Intensidade (0-10)</label>
+                    <input type="range" id="emotionIntensity" min="0" max="10" value="5">
+                    <span id="intensityValue">5</span>
+                </div>
+
+                <div class="form-group">
+                    <label>O que disparou essa emoção?</label>
+                    <textarea id="emotionTrigger" rows="3" placeholder="Descreva a situação..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Sensações físicas</label>
+                    <textarea id="physicalSensations" rows="3" placeholder="O que você sente no corpo?"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Pensamentos</label>
+                    <textarea id="emotionThoughts" rows="3" placeholder="O que passa pela sua mente?"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Impulso de ação</label>
+                    <textarea id="actionUrge" rows="3" placeholder="O que você tem vontade de fazer?"></textarea>
+                </div>
+
+                <button class="btn btn-success" onclick="saveEmotionLog()">Registrar Emoção</button>
+
+                <h3 style="margin-top: 30px;">Histórico de Emoções</h3>
+                <div id="emotionHistory"></div>
+            </div>
+
+            <!-- Routine Tab -->
+            <div id="routine" class="tab-content">
+                <h2>Minha Rotina</h2>
+                
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <span class="timeline-time">08:00</span>
+                        <div class="timeline-content" onclick="toggleComplete(this)">
+                            <strong>Acordar e tomar café</strong>
+                            <p>Cuidar dos cachorros</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <span class="timeline-time">08:30</span>
+                        <div class="timeline-content" onclick="toggleComplete(this)">
+                            <strong>Caminhada</strong>
+                            <p>30 minutos de atividade física</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <span class="timeline-time">09:00</span>
+                        <div class="timeline-content" onclick="toggleComplete(this)">
+                            <strong>Estudo/Trabalho</strong>
+                            <p>Foco nas atividades principais</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <span class="timeline-time">12:00</span>
+                        <div class="timeline-content" onclick="toggleComplete(this)">
+                            <strong>Almoço</strong>
+                            <p>Pausa para refeição</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <span class="timeline-time">13:00</span>
+                        <div class="timeline-content" onclick="toggleComplete(this)">
+                            <strong>Trabalho/Estudo</strong>
+                            <p>Continuar projetos</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <span class="timeline-time">16:00</span>
+                        <div class="timeline-content" onclick="toggleComplete(this)">
+                            <strong>Cuidar dos cachorros</strong>
+                            <p>Momento de pausa e cuidado</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <span class="timeline-time">18:00</span>
+                        <div class="timeline-content" onclick="toggleComplete(this)">
+                            <strong>Estudo</strong>
+                            <p>Revisão e aprendizado</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <span class="timeline-time">22:00</span>
+                        <div class="timeline-content" onclick="toggleComplete(this)">
+                            <strong>Jantar</strong>
+                            <p>Refeição noturna</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <span class="timeline-time">23:00</span>
+                        <div class="timeline-content" onclick="toggleComplete(this)">
+                            <strong>Mindfulness Formal</strong>
+                            <p>Prática antes de dormir</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <span class="timeline-time">01:00</span>
+                        <div class="timeline-content" onclick="toggleComplete(this)">
+                            <strong>Dormir</strong>
+                            <p>Descanso necessário</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="resetRoutine()">Resetar Dia</button>
+            </div>
+
+            <!-- DBT Skills Tab -->
+            <div id="skills" class="tab-content">
+                <h2>Habilidades DBT</h2>
+                
+                <div class="skills-grid">
+                    <div class="skill-card" onclick="openSkillModal('dearman')">
+                        <div class="skill-header">
+                            <h3>DEAR MAN</h3>
+                            <span class="skill-badge">Efetividade Interpessoal</span>
+                        </div>
+                        <p>Técnica para pedir o que precisa de forma efetiva</p>
+                    </div>
+
+                    <div class="skill-card" onclick="openSkillModal('accepts')">
+                        <div class="skill-header">
+                            <h3>ACCEPTS</h3>
+                            <span class="skill-badge">Tolerância ao Mal-estar</span>
+                        </div>
+                        <p>Distrair-se de emoções intensas</p>
+                    </div>
+
+                    <div class="skill-card" onclick="openSkillModal('tipp')">
+                        <div class="skill-header">
+                            <h3>TIPP</h3>
+                            <span class="skill-badge">Crise</span>
+                        </div>
+                        <p>Mudar química corporal rapidamente</p>
+                    </div>
+
+                    <div class="skill-card" onclick="openSkillModal('stop')">
+                        <div class="skill-header">
+                            <h3>STOP</h3>
+                            <span class="skill-badge">Regulação Emocional</span>
+                        </div>
+                        <p>Pausar antes de agir impulsivamente</p>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 30px;">Minha Carta ACCEPTS</h3>
+                <div class="form-group">
+                    <label>Atividades que me distraem:</label>
+                    <textarea id="acceptsActivities" rows="2" placeholder="Ex: Jogar, assistir série, programar..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Formas de contribuir:</label>
+                    <textarea id="acceptsContribute" rows="2" placeholder="Ex: Ajudar alguém, fazer algo útil..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Comparações úteis:</label>
+                    <textarea id="acceptsCompare" rows="2" placeholder="Ex: Lembrar de momentos piores que superei..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Emoções opostas:</label>
+                    <textarea id="acceptsEmotions" rows="2" placeholder="Ex: Assistir comédia quando triste..."></textarea>
+                </div>
+                <button class="btn btn-success" onclick="saveAccepts()">Salvar ACCEPTS</button>
+            </div>
+
+            <!-- Mindfulness Tab -->
+            <div id="mindfulness" class="tab-content">
+                <h2>Prática de Mindfulness</h2>
+                
+                <div class="dashboard-card" style="text-align: center;">
+                    <h3>Timer de Meditação</h3>
+                    <div class="timer-display" id="timerDisplay">00:00</div>
+                    <div class="timer-controls">
+                        <button class="btn" onclick="setTimer(5)">5 min</button>
+                        <button class="btn" onclick="setTimer(10)">10 min</button>
+                        <button class="btn" onclick="setTimer(15)">15 min</button>
+                        <button class="btn" onclick="setTimer(20)">20 min</button>
+                    </div>
+                    <div class="timer-controls" style="margin-top: 15px;">
+                        <button class="btn btn-success" onclick="startTimer()">Iniciar</button>
+                        <button class="btn btn-danger" onclick="stopTimer()">Parar</button>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <h3>Registro de Prática</h3>
+                    <div class="form-group">
+                        <label>Tipo de Prática</label>
+                        <select id="mindfulnessType">
+                            <option value="formal">Formal (sentado)</option>
+                            <option value="informal">Informal (durante atividade)</option>
+                            <option value="breathing">Respiração</option>
+                            <option value="body-scan">Escaneamento corporal</option>
+                            <option value="walking">Caminhada consciente</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Duração (minutos)</label>
+                        <input type="number" id="mindfulnessDuration" min="1" placeholder="Ex: 10">
+                    </div>
+                    <div class="form-group">
+                        <label>Como foi a experiência?</label>
+                        <textarea id="mindfulnessNotes" rows="3" placeholder="Descreva sua prática..."></textarea>
+                    </div>
+                    <button class="btn btn-success" onclick="saveMindfulness()">Registrar Prática</button>
+                </div>
+
+                <h3>Histórico de Práticas</h3>
+                <div id="mindfulnessHistory"></div>
+            </div>
+
+            <!-- Notes Tab -->
+            <div id="notes" class="tab-content">
+                <h2>Anotações das Sessões</h2>
+                
+                <div class="form-group">
+                    <label>Data da Sessão</label>
+                    <input type="date" id="sessionDate">
+                </div>
+                
+                <div class="form-group">
+                    <label>Resumo da Sessão</label>
+                    <textarea id="sessionSummary" rows="4" placeholder="O que foi discutido..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Tarefas para Casa</label>
+                    <textarea id="sessionHomework" rows="4" placeholder="- Tarefa 1&#10;- Tarefa 2&#10;- Tarefa 3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Insights Importantes</label>
+                    <textarea id="sessionInsights" rows="3" placeholder="O que aprendi..."></textarea>
+                </div>
+                
+                <button class="btn btn-success" onclick="saveSession()">Salvar Anotações</button>
+                
+                <h3 style="margin-top: 30px;">Sessões Anteriores</h3>
+                <div id="sessionHistory"></div>
+            </div>
+
+            <!-- Rewards Tab -->
+            <div id="rewards" class="tab-content">
+                <h2>Sistema de Recompensas</h2>
+                
+                <div class="dashboard-card">
+                    <h3>Seus Pontos: <span id="rewardPoints">0</span></h3>
+                    <p>Complete atividades para ganhar pontos!</p>
+                </div>
+
+                <h3>Adicionar Nova Recompensa</h3>
+                <div class="form-group">
+                    <label>Nome da Recompensa</label>
+                    <input type="text" id="rewardName" placeholder="Ex: Assistir um episódio da série favorita">
+                </div>
+                <div class="form-group">
+                    <label>Custo em Pontos</label>
+                    <input type="number" id="rewardCost" min="1" placeholder="Ex: 10">
+                </div>
+                <button class="btn btn-success" onclick="addReward()">Adicionar Recompensa</button>
+
+                <h3 style="margin-top: 30px;">Recompensas Disponíveis</h3>
+                <div class="rewards-container" id="rewardsContainer"></div>
+
+                <h3 style="margin-top: 30px;">Lista de Comportamentos</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="dashboard-card">
+                        <h4>😊 Comportamentos que Gosto</h4>
+                        <textarea id="likedBehaviors" rows="5" placeholder="- Acordar no horário&#10;- Fazer exercício&#10;- Estudar programação"></textarea>
+                        <button class="btn btn-success" onclick="saveBehaviors()">Salvar</button>
+                    </div>
+                    <div class="dashboard-card">
+                        <h4>😕 Comportamentos que Não Gosto</h4>
+                        <textarea id="dislikedBehaviors" rows="5" placeholder="- Dormir tarde&#10;- Pular refeições&#10;- Procrastinar"></textarea>
+                        <button class="btn btn-success" onclick="saveBehaviors()">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for DBT Skills -->
+    <div id="skillModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="skillTitle"></h2>
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+            </div>
+            <div id="skillContent"></div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <div class="fab" onclick="quickAdd()">+</div>
+
+    <script>
+        // Initialize app
+        let currentMood = null;
+        let timerInterval = null;
+        let timerSeconds = 0;
+        let points = parseInt(localStorage.getItem('rewardPoints') || '0');
+
+        // Load saved data on startup
+        window.onload = function() {
+            loadAllData();
+            updateDate();
+            updateProgress();
+            loadMindfulnessHistory();
+            loadEmotionHistory();
+            loadSessionHistory();
+            loadRewards();
+            updatePointsDisplay();
+        };
+
+        // Theme toggle
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+
+        // Load theme preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+
+        // Update current date
+        function updateDate() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('pt-BR', options);
+        }
+
+        // Tab switching
+        function switchTab(tabName, trigger) {
+            // Show only the selected tab
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.toggle('active', tab.id === tabName);
+            });
+            
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(nav => nav.classList.remove('active'));
+            
+            if (trigger && trigger.classList) {
+                trigger.classList.add('active');
+            } else {
+                const matchingNav = Array.from(navTabs).find(nav => nav.dataset.tab === tabName);
+                if (matchingNav) {
+                    matchingNav.classList.add('active');
+                }
+            }
+        }
+
+        // Mood tracking
+        function selectMood(value, element) {
+            document.querySelectorAll('.mood-emoji').forEach(emoji => {
+                emoji.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            currentMood = value;
+        }
+
+        function saveMood() {
+            if (!currentMood) {
+                alert('Por favor, selecione um humor primeiro!');
+                return;
+            }
+            
+            const moodData = {
+                value: currentMood,
+                timestamp: new Date().toISOString()
+            };
+            
+            let moods = JSON.parse(localStorage.getItem('moods') || '[]');
+            moods.push(moodData);
+            localStorage.setItem('moods', JSON.stringify(moods));
+            
+            celebrate();
+            addPoints(5);
+            alert('Humor registrado com sucesso!');
+        }
+
+        // Emotion tracking
+        document.getElementById('emotionIntensity').addEventListener('input', function() {
+            document.getElementById('intensityValue').textContent = this.value;
+        });
+
+        function saveEmotionLog() {
+            const emotion = {
+                type: document.getElementById('emotionType').value,
+                intensity: document.getElementById('emotionIntensity').value,
+                trigger: document.getElementById('emotionTrigger').value,
+                physical: document.getElementById('physicalSensations').value,
+                thoughts: document.getElementById('emotionThoughts').value,
+                urge: document.getElementById('actionUrge').value,
+                timestamp: new Date().toISOString()
+            };
+            
+            if (!emotion.type) {
+                alert('Por favor, selecione uma emoção!');
+                return;
+            }
+            
+            let emotions = JSON.parse(localStorage.getItem('emotions') || '[]');
+            emotions.push(emotion);
+            localStorage.setItem('emotions', JSON.stringify(emotions));
+            
+            // Clear form
+            document.getElementById('emotionType').value = '';
+            document.getElementById('emotionIntensity').value = 5;
+            document.getElementById('intensityValue').textContent = '5';
+            document.getElementById('emotionTrigger').value = '';
+            document.getElementById('physicalSensations').value = '';
+            document.getElementById('emotionThoughts').value = '';
+            document.getElementById('actionUrge').value = '';
+            
+            loadEmotionHistory();
+            addPoints(10);
+            alert('Emoção registrada com sucesso!');
+        }
+
+        function loadEmotionHistory() {
+            const emotions = JSON.parse(localStorage.getItem('emotions') || '[]');
+            const historyDiv = document.getElementById('emotionHistory');
+            
+            if (emotions.length === 0) {
+                historyDiv.innerHTML = '<p>Nenhuma emoção registrada ainda.</p>';
+                return;
+            }
+            
+            historyDiv.innerHTML = emotions.slice(-5).reverse().map(emotion => `
+                <div class="emotion-log">
+                    <div class="note-date">${new Date(emotion.timestamp).toLocaleString('pt-BR')}</div>
+                    <strong>${emotion.type} (Intensidade: ${emotion.intensity}/10)</strong>
+                    ${emotion.trigger ? `<p><strong>Gatilho:</strong> ${emotion.trigger}</p>` : ''}
+                    ${emotion.thoughts ? `<p><strong>Pensamentos:</strong> ${emotion.thoughts}</p>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Routine management
+        function toggleComplete(element) {
+            element.classList.toggle('completed');
+            updateProgress();
+            if (element.classList.contains('completed')) {
+                addPoints(2);
+            }
+        }
+
+        function updateProgress() {
+            const total = document.querySelectorAll('.timeline-content').length;
+            const completed = document.querySelectorAll('.timeline-content.completed').length;
+            const percentage = Math.round((completed / total) * 100);
+            
+            document.getElementById('dailyProgress').style.width = percentage + '%';
+            document.getElementById('dailyProgress').textContent = percentage + '%';
+            document.getElementById('completedCount').textContent = completed;
+        }
+
+        function resetRoutine() {
+            document.querySelectorAll('.timeline-content').forEach(item => {
+                item.classList.remove('completed');
+            });
+            updateProgress();
+        }
+
+        // DBT Skills Modal
+        function openSkillModal(skill) {
+            const modal = document.getElementById('skillModal');
+            const title = document.getElementById('skillTitle');
+            const content = document.getElementById('skillContent');
+            
+            const skills = {
+                dearman: {
+                    title: 'DEAR MAN',
+                    content: `
+                        <h3>Técnica para Efetividade Interpessoal</h3>
+                        <p><strong>D</strong>escrever - Descreva a situação objetivamente</p>
+                        <p><strong>E</strong>xpressar - Expresse seus sentimentos e opiniões</p>
+                        <p><strong>A</strong>firmar - Afirme o que você quer claramente</p>
+                        <p><strong>R</strong>eforçar - Reforce os benefícios</p>
+                        <hr>
+                        <p><strong>M</strong>indful - Mantenha-se focado no objetivo</p>
+                        <p><strong>A</strong>ppear confident - Apareça confiante</p>
+                        <p><strong>N</strong>egotiate - Negocie quando necessário</p>
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label>Praticar DEAR MAN:</label>
+                            <textarea id="dearmanPractice" rows="4" placeholder="Descreva uma situação onde você usaria DEAR MAN..."></textarea>
+                            <button class="btn btn-success" onclick="saveDearMan()">Salvar Prática</button>
+                        </div>
+                    `
+                },
+                accepts: {
+                    title: 'ACCEPTS',
+                    content: `
+                        <h3>Distrair-se de Emoções Intensas</h3>
+                        <p><strong>A</strong>ctivities - Atividades</p>
+                        <p><strong>C</strong>ontributing - Contribuir</p>
+                        <p><strong>C</strong>omparisons - Comparações</p>
+                        <p><strong>E</strong>motions - Emoções opostas</p>
+                        <p><strong>P</strong>ushing away - Afastar pensamentos</p>
+                        <p><strong>T</strong>houghts - Outros pensamentos</p>
+                        <p><strong>S</strong>ensations - Sensações físicas</p>
+                    `
+                },
+                tipp: {
+                    title: 'TIPP',
+                    content: `
+                        <h3>Mudar a Química Corporal Rapidamente</h3>
+                        <p><strong>T</strong>emperature - Temperatura (água gelada no rosto)</p>
+                        <p><strong>I</strong>ntense exercise - Exercício intenso</p>
+                        <p><strong>P</strong>aced breathing - Respiração compassada</p>
+                        <p><strong>P</strong>aired muscle relaxation - Relaxamento muscular progressivo</p>
+                    `
+                },
+                stop: {
+                    title: 'STOP',
+                    content: `
+                        <h3>Pausar Antes de Agir</h3>
+                        <p><strong>S</strong>top - Pare</p>
+                        <p><strong>T</strong>ake a step back - Dê um passo atrás</p>
+                        <p><strong>O</strong>bserve - Observe</p>
+                        <p><strong>P</strong>roceed mindfully - Prossiga conscientemente</p>
+                    `
+                }
+            };
+            
+            title.textContent = skills[skill].title;
+            content.innerHTML = skills[skill].content;
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('skillModal').classList.remove('active');
+        }
+
+        function saveDearMan() {
+            const practice = document.getElementById('dearmanPractice').value;
+            if (practice) {
+                let practices = JSON.parse(localStorage.getItem('dearmanPractices') || '[]');
+                practices.push({
+                    content: practice,
+                    timestamp: new Date().toISOString()
+                });
+                localStorage.setItem('dearmanPractices', JSON.stringify(practices));
+                addPoints(15);
+                alert('Prática de DEAR MAN salva!');
+                closeModal();
+            }
+        }
+
+        function saveAccepts() {
+            const accepts = {
+                activities: document.getElementById('acceptsActivities').value,
+                contribute: document.getElementById('acceptsContribute').value,
+                compare: document.getElementById('acceptsCompare').value,
+                emotions: document.getElementById('acceptsEmotions').value
+            };
+            localStorage.setItem('acceptsCard', JSON.stringify(accepts));
+            addPoints(20);
+            alert('Carta ACCEPTS salva com sucesso!');
+        }
+
+        // Mindfulness timer
+        function setTimer(minutes) {
+            timerSeconds = minutes * 60;
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timerSeconds / 60);
+            const seconds = timerSeconds % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            if (timerInterval) return;
+            
+            timerInterval = setInterval(() => {
+                if (timerSeconds > 0) {
+                    timerSeconds--;
+                    updateTimerDisplay();
+                } else {
+                    stopTimer();
+                    alert('Meditação concluída! 🧘');
+                    celebrate();
+                    addPoints(25);
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function saveMindfulness() {
+            const practice = {
+                type: document.getElementById('mindfulnessType').value,
+                duration: document.getElementById('mindfulnessDuration').value,
+                notes: document.getElementById('mindfulnessNotes').value,
+                timestamp: new Date().toISOString()
+            };
+            
+            if (!practice.duration) {
+                alert('Por favor, insira a duração da prática!');
+                return;
+            }
+            
+            let practices = JSON.parse(localStorage.getItem('mindfulnessPractices') || '[]');
+            practices.push(practice);
+            localStorage.setItem('mindfulnessPractices', JSON.stringify(practices));
+            localStorage.setItem('lastMindfulness', new Date().toLocaleDateString('pt-BR'));
+            
+            // Clear form
+            document.getElementById('mindfulnessDuration').value = '';
+            document.getElementById('mindfulnessNotes').value = '';
+            
+            loadMindfulnessHistory();
+            addPoints(20);
+            alert('Prática registrada com sucesso!');
+        }
+
+        function loadMindfulnessHistory() {
+            const practices = JSON.parse(localStorage.getItem('mindfulnessPractices') || '[]');
+            const historyDiv = document.getElementById('mindfulnessHistory');
+            
+            if (practices.length === 0) {
+                historyDiv.innerHTML = '<p>Nenhuma prática registrada ainda.</p>';
+                return;
+            }
+            
+            historyDiv.innerHTML = practices.slice(-5).reverse().map(practice => `
+                <div class="note-card">
+                    <div class="note-date">${new Date(practice.timestamp).toLocaleString('pt-BR')}</div>
+                    <strong>${practice.type} - ${practice.duration} minutos</strong>
+                    ${practice.notes ? `<p>${practice.notes}</p>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Session notes
+        function saveSession() {
+            const session = {
+                date: document.getElementById('sessionDate').value,
+                summary: document.getElementById('sessionSummary').value,
+                homework: document.getElementById('sessionHomework').value,
+                insights: document.getElementById('sessionInsights').value,
+                timestamp: new Date().toISOString()
+            };
+            
+            if (!session.date || !session.summary) {
+                alert('Por favor, preencha a data e o resumo da sessão!');
+                return;
+            }
+            
+            let sessions = JSON.parse(localStorage.getItem('sessions') || '[]');
+            sessions.push(session);
+            localStorage.setItem('sessions', JSON.stringify(sessions));
+            
+            // Clear form
+            document.getElementById('sessionDate').value = '';
+            document.getElementById('sessionSummary').value = '';
+            document.getElementById('sessionHomework').value = '';
+            document.getElementById('sessionInsights').value = '';
+            
+            loadSessionHistory();
+            addPoints(30);
+            alert('Sessão salva com sucesso!');
+        }
+
+        function loadSessionHistory() {
+            const sessions = JSON.parse(localStorage.getItem('sessions') || '[]');
+            const historyDiv = document.getElementById('sessionHistory');
+            
+            if (sessions.length === 0) {
+                historyDiv.innerHTML = '<p>Nenhuma sessão registrada ainda.</p>';
+                return;
+            }
+            
+            historyDiv.innerHTML = sessions.slice(-5).reverse().map(session => `
+                <div class="note-card">
+                    <div class="note-date">Sessão de ${new Date(session.date).toLocaleDateString('pt-BR')}</div>
+                    <p><strong>Resumo:</strong> ${session.summary}</p>
+                    ${session.homework ? `<p><strong>Tarefas:</strong> ${session.homework}</p>` : ''}
+                    ${session.insights ? `<p><strong>Insights:</strong> ${session.insights}</p>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Rewards system
+        function addPoints(amount) {
+            points += amount;
+            localStorage.setItem('rewardPoints', points.toString());
+            updatePointsDisplay();
+        }
+
+        function updatePointsDisplay() {
+            document.getElementById('rewardPoints').textContent = points;
+        }
+
+        function addReward() {
+            const name = document.getElementById('rewardName').value;
+            const cost = document.getElementById('rewardCost').value;
+            
+            if (!name || !cost) {
+                alert('Por favor, preencha todos os campos!');
+                return;
+            }
+            
+            let rewards = JSON.parse(localStorage.getItem('rewards') || '[]');
+            rewards.push({
+                id: Date.now(),
+                name: name,
+                cost: parseInt(cost),
+                claimed: false
+            });
+            localStorage.setItem('rewards', JSON.stringify(rewards));
+            
+            document.getElementById('rewardName').value = '';
+            document.getElementById('rewardCost').value = '';
+            
+            loadRewards();
+            alert('Recompensa adicionada!');
+        }
+
+        function loadRewards() {
+            const rewards = JSON.parse(localStorage.getItem('rewards') || '[]');
+            const container = document.getElementById('rewardsContainer');
+            
+            if (rewards.length === 0) {
+                container.innerHTML = '<p>Nenhuma recompensa cadastrada ainda.</p>';
+                return;
+            }
+            
+            container.innerHTML = rewards.map(reward => `
+                <div class="reward-item ${reward.claimed ? 'claimed' : ''}" onclick="claimReward(${reward.id})">
+                    <h4>${reward.name}</h4>
+                    <p>${reward.cost} pontos</p>
+                    ${reward.claimed ? '<p>✓ Resgatado</p>' : ''}
+                </div>
+            `).join('');
+        }
+
+        function claimReward(id) {
+            let rewards = JSON.parse(localStorage.getItem('rewards') || '[]');
+            const reward = rewards.find(r => r.id === id);
+            
+            if (reward && !reward.claimed) {
+                if (points >= reward.cost) {
+                    points -= reward.cost;
+                    reward.claimed = true;
+                    localStorage.setItem('rewards', JSON.stringify(rewards));
+                    localStorage.setItem('rewardPoints', points.toString());
+                    updatePointsDisplay();
+                    loadRewards();
+                    celebrate();
+                    alert(`Recompensa "${reward.name}" resgatada!`);
+                } else {
+                    alert('Pontos insuficientes!');
+                }
+            }
+        }
+
+        function saveBehaviors() {
+            const behaviors = {
+                liked: document.getElementById('likedBehaviors').value,
+                disliked: document.getElementById('dislikedBehaviors').value
+            };
+            localStorage.setItem('behaviors', JSON.stringify(behaviors));
+            addPoints(10);
+            alert('Comportamentos salvos!');
+        }
+
+        // Quick add button
+        function quickAdd() {
+            const choice = prompt('O que você quer registrar?\n1 - Humor\n2 - Emoção\n3 - Mindfulness\n4 - Anotação rápida');
+            
+            switch(choice) {
+                case '1':
+                    switchTab('dashboard');
+                    break;
+                case '2':
+                    switchTab('emotions');
+                    break;
+                case '3':
+                    switchTab('mindfulness');
+                    break;
+                case '4':
+                    const note = prompt('Digite sua anotação:');
+                    if (note) {
+                        let quickNotes = JSON.parse(localStorage.getItem('quickNotes') || '[]');
+                        quickNotes.push({
+                            content: note,
+                            timestamp: new Date().toISOString()
+                        });
+                        localStorage.setItem('quickNotes', JSON.stringify(quickNotes));
+                        alert('Anotação salva!');
+                    }
+                    break;
+            }
+        }
+
+        // Celebration animation
+        function celebrate() {
+            const celebration = document.createElement('div');
+            celebration.className = 'celebration';
+            celebration.textContent = '🎉';
+            document.body.appendChild(celebration);
+            
+            setTimeout(() => {
+                celebration.remove();
+            }, 1000);
+        }
+
+        // Load all saved data
+        function loadAllData() {
+            // Load last activities
+            document.getElementById('lastMindfulness').textContent = 
+                localStorage.getItem('lastMindfulness') || 'Não registrado';
+            
+            // Load ACCEPTS card
+            const accepts = JSON.parse(localStorage.getItem('acceptsCard') || '{}');
+            if (accepts.activities) document.getElementById('acceptsActivities').value = accepts.activities;
+            if (accepts.contribute) document.getElementById('acceptsContribute').value = accepts.contribute;
+            if (accepts.compare) document.getElementById('acceptsCompare').value = accepts.compare;
+            if (accepts.emotions) document.getElementById('acceptsEmotions').value = accepts.emotions;
+            
+            // Load behaviors
+            const behaviors = JSON.parse(localStorage.getItem('behaviors') || '{}');
+            if (behaviors.liked) document.getElementById('likedBehaviors').value = behaviors.liked;
+            if (behaviors.disliked) document.getElementById('dislikedBehaviors').value = behaviors.disliked;
+        }
+
+        // Export data function
+        function exportData() {
+            const data = {
+                moods: localStorage.getItem('moods'),
+                emotions: localStorage.getItem('emotions'),
+                mindfulness: localStorage.getItem('mindfulnessPractices'),
+                sessions: localStorage.getItem('sessions'),
+                accepts: localStorage.getItem('acceptsCard'),
+                behaviors: localStorage.getItem('behaviors'),
+                rewards: localStorage.getItem('rewards'),
+                points: localStorage.getItem('rewardPoints'),
+                exportDate: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `therapeutic-data-${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+    </script>
+</body>
+</html>

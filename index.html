@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Espaço Terapêutico - DBT</title>
+    <title>Meu Espaço Terapêutico - DBT v2</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -51,7 +53,6 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
         }
 
@@ -88,6 +89,25 @@
             display: flex;
             gap: 15px;
             align-items: center;
+        }
+
+        .backup-badge {
+            background: rgba(130, 202, 157, 0.2);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--success);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .backup-badge:hover {
+            background: rgba(130, 202, 157, 0.4);
+        }
+
+        .backup-badge.warning {
+            background: rgba(246, 114, 128, 0.2);
+            color: var(--danger);
         }
 
         .theme-toggle {
@@ -271,6 +291,21 @@
             box-shadow: 0 0 0 3px rgba(107, 91, 149, 0.1);
         }
 
+        input.error, textarea.error, select.error {
+            border-color: var(--danger);
+        }
+
+        .field-error {
+            color: var(--danger);
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .field-error.visible {
+            display: block;
+        }
+
         .btn {
             padding: 12px 24px;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -288,6 +323,12 @@
             box-shadow: 0 5px 20px rgba(107, 91, 149, 0.3);
         }
 
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .btn-secondary {
             background: var(--secondary);
         }
@@ -300,174 +341,21 @@
             background: var(--danger);
         }
 
-        /* Routine Timeline */
-        .timeline {
-            position: relative;
-            padding: 20px 0;
-        }
-
-        .timeline-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 30px;
-            position: relative;
-        }
-
-        .timeline-time {
-            width: 80px;
-            font-weight: bold;
-            color: var(--primary);
-        }
-
-        .timeline-content {
-            flex: 1;
-            background: rgba(136, 176, 211, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin-left: 20px;
-            border-left: 3px solid var(--secondary);
-        }
-
-        .timeline-content.completed {
-            background: rgba(130, 202, 157, 0.2);
-            border-left-color: var(--success);
-        }
-
-        /* Emotion Cards */
-        .emotion-log {
-            background: rgba(255, 255, 255, 0.5);
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            border-left: 4px solid var(--accent);
-        }
-
-        .dark-mode .emotion-log {
-            background: rgba(0, 0, 0, 0.3);
-        }
-
-        /* Skills Section */
-        .skills-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .skill-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        .period-btn {
+            padding: 8px 16px;
+            margin-right: 5px;
+            background: rgba(136, 176, 211, 0.2);
+            border: 2px solid var(--secondary);
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
+            font-size: 14px;
+            font-weight: 500;
         }
 
-        .dark-mode .skill-card {
-            background: var(--card-dark);
-        }
-
-        .skill-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .skill-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .skill-badge {
-            background: var(--accent);
+        .period-btn:hover {
+            background: var(--secondary);
             color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-        }
-
-        /* Mindfulness Timer */
-        .timer-display {
-            font-size: 48px;
-            font-weight: bold;
-            text-align: center;
-            margin: 30px 0;
-            color: var(--primary);
-        }
-
-        .timer-controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        /* Rewards */
-        .rewards-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .reward-item {
-            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .reward-item:hover {
-            transform: scale(1.05);
-        }
-
-        .reward-item.claimed {
-            opacity: 0.5;
-            background: #dfe6e9;
-        }
-
-        /* Progress Bar */
-        .progress-bar {
-            width: 100%;
-            height: 30px;
-            background: #e0e0e0;
-            border-radius: 15px;
-            overflow: hidden;
-            margin: 20px 0;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--success), var(--accent));
-            transition: width 0.5s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-        }
-
-        /* Floating Action Button */
-        .fab {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s;
-        }
-
-        .fab:hover {
-            transform: scale(1.1);
         }
 
         /* Modal */
@@ -493,7 +381,7 @@
             background: white;
             padding: 30px;
             border-radius: 20px;
-            max-width: 600px;
+            max-width: 500px;
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
@@ -529,65 +417,76 @@
             color: #999;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-            
-            .header {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .nav-tabs {
-                justify-content: center;
-            }
-            
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Animations */
-        .celebration {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 100px;
-            animation: celebrate 1s ease-out;
-            pointer-events: none;
-        }
-
-        @keyframes celebrate {
-            0% {
-                transform: translate(-50%, -50%) scale(0);
-                opacity: 1;
-            }
-            100% {
-                transform: translate(-50%, -50%) scale(2);
-                opacity: 0;
-            }
-        }
-
-        /* Notes Section */
-        .note-card {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 15px;
+        /* Emotion history */
+        .emotion-log {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 20px;
+            border-radius: 10px;
             margin-bottom: 15px;
-            border-radius: 5px;
+            border-left: 4px solid var(--accent);
         }
 
-        .dark-mode .note-card {
-            background: rgba(255, 193, 7, 0.2);
+        .dark-mode .emotion-log {
+            background: rgba(0, 0, 0, 0.3);
         }
 
         .note-date {
             font-size: 12px;
             color: #666;
             margin-bottom: 5px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-tabs {
+                justify-content: center;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            animation: slideIn 0.3s;
+            max-width: 300px;
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
     </style>
 </head>
@@ -597,9 +496,15 @@
         <div class="header">
             <div class="logo">
                 <div class="logo-icon">🌱</div>
-                <h1>Meu Espaço Terapêutico</h1>
+                <div>
+                    <h1>Meu Espaço Terapêutico v2</h1>
+                    <small id="dataStatus">Carregando...</small>
+                </div>
             </div>
             <div class="header-controls">
+                <div class="backup-badge" id="backupBadge" onclick="showBackupModal()">
+                    <span id="backupText">Último backup: nunca</span>
+                </div>
                 <span id="currentDate"></span>
                 <div class="theme-toggle" onclick="toggleTheme()"></div>
             </div>
@@ -616,17 +521,17 @@
             <button class="nav-tab" data-tab="routine" onclick="switchTab('routine', this)">
                 <span>📅</span> Rotina
             </button>
-            <button class="nav-tab" data-tab="skills" onclick="switchTab('skills', this)">
-                <span>🛠️</span> Habilidades DBT
-            </button>
             <button class="nav-tab" data-tab="mindfulness" onclick="switchTab('mindfulness', this)">
                 <span>🧘</span> Mindfulness
             </button>
-            <button class="nav-tab" data-tab="notes" onclick="switchTab('notes', this)">
-                <span>📝</span> Anotações
+            <button class="nav-tab" data-tab="skills" onclick="switchTab('skills', this)">
+                <span>🛠️</span> Habilidades
             </button>
-            <button class="nav-tab" data-tab="rewards" onclick="switchTab('rewards', this)">
-                <span>🏆</span> Recompensas
+            <button class="nav-tab" data-tab="sessions" onclick="switchTab('sessions', this)">
+                <span>📝</span> Sessões
+            </button>
+            <button class="nav-tab" data-tab="settings" onclick="switchTab('settings', this)">
+                <span>⚙️</span> Configurações
             </button>
         </div>
 
@@ -634,49 +539,69 @@
         <div class="content-area">
             <!-- Dashboard Tab -->
             <div id="dashboard" class="tab-content active">
-                <h2>Bem-vindo de volta! Como você está hoje?</h2>
-                
+                <h2>Como você está hoje?</h2>
+
                 <div class="dashboard-grid">
                     <div class="dashboard-card mood-tracker">
-                        <h3>Registro de Humor</h3>
+                        <h3>Registro Rápido de Humor</h3>
                         <div class="mood-scale">
-                            <span class="mood-emoji" onclick="selectMood(1, this)">😔</span>
-                            <span class="mood-emoji" onclick="selectMood(2, this)">😕</span>
-                            <span class="mood-emoji" onclick="selectMood(3, this)">😐</span>
-                            <span class="mood-emoji" onclick="selectMood(4, this)">🙂</span>
-                            <span class="mood-emoji" onclick="selectMood(5, this)">😊</span>
+                            <span class="mood-emoji" onclick="selectMood(1, this)" title="Muito mal">😔</span>
+                            <span class="mood-emoji" onclick="selectMood(2, this)" title="Mal">😕</span>
+                            <span class="mood-emoji" onclick="selectMood(3, this)" title="Neutro">😐</span>
+                            <span class="mood-emoji" onclick="selectMood(4, this)" title="Bem">🙂</span>
+                            <span class="mood-emoji" onclick="selectMood(5, this)" title="Muito bem">😊</span>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="moodNote" rows="2" placeholder="Notas opcionais..."></textarea>
                         </div>
                         <button class="btn btn-success" onclick="saveMood()">Registrar Humor</button>
                     </div>
 
                     <div class="dashboard-card">
-                        <h3>Progresso do Dia</h3>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="dailyProgress" style="width: 0%">0%</div>
-                        </div>
-                        <p>Atividades completadas: <span id="completedCount">0</span>/8</p>
+                        <h3>Resumo de Hoje</h3>
+                        <p><strong>Registros:</strong></p>
+                        <ul id="todaySummary" style="margin-left: 20px; margin-top: 10px;">
+                            <li>Carregando...</li>
+                        </ul>
                     </div>
 
                     <div class="dashboard-card">
-                        <h3>Última Prática</h3>
-                        <p>🧘 Mindfulness: <span id="lastMindfulness">Não registrado</span></p>
-                        <p>💊 Medicação: <span id="lastMedication">Não registrado</span></p>
-                        <p>🏃 Exercício: <span id="lastExercise">Não registrado</span></p>
+                        <h3>Comparação Semanal</h3>
+                        <div id="weeklyComparison">
+                            <p><strong>Semana atual vs anterior:</strong></p>
+                            <div id="comparisonStats" style="margin-top: 10px;">
+                                Carregando...
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="dashboard-card">
-                    <h3>Resumo da Semana</h3>
-                    <canvas id="weekChart"></canvas>
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                        <h3>Tendência de Humor</h3>
+                        <div>
+                            <button class="period-btn" onclick="changeMoodPeriod(7)">7 dias</button>
+                            <button class="period-btn" onclick="changeMoodPeriod(14)">14 dias</button>
+                            <button class="period-btn" onclick="changeMoodPeriod(30)">30 dias</button>
+                        </div>
+                    </div>
+                    <canvas id="moodChart" style="max-height: 300px;"></canvas>
+                </div>
+
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h3>Emoções da Semana (Heatmap)</h3>
+                    <div id="emotionHeatmap" style="margin-top: 15px;">
+                        Carregando...
+                    </div>
                 </div>
             </div>
 
             <!-- Emotions Tab -->
             <div id="emotions" class="tab-content">
-                <h2>Observar e Descrever Emoções</h2>
-                
+                <h2>Registro de Emoções</h2>
+
                 <div class="form-group">
-                    <label>Que emoção você está sentindo agora?</label>
+                    <label>Que emoção você está sentindo? *</label>
                     <select id="emotionType">
                         <option value="">Selecione...</option>
                         <option value="alegria">Alegria</option>
@@ -687,873 +612,1671 @@
                         <option value="calma">Calma</option>
                         <option value="frustração">Frustração</option>
                         <option value="esperança">Esperança</option>
+                        <option value="vergonha">Vergonha</option>
                     </select>
+                    <div class="field-error" id="emotionTypeError">Selecione uma emoção</div>
                 </div>
 
                 <div class="form-group">
-                    <label>Intensidade (0-10)</label>
+                    <label>Intensidade (0-10) *</label>
                     <input type="range" id="emotionIntensity" min="0" max="10" value="5">
                     <span id="intensityValue">5</span>
                 </div>
 
                 <div class="form-group">
                     <label>O que disparou essa emoção?</label>
-                    <textarea id="emotionTrigger" rows="3" placeholder="Descreva a situação..."></textarea>
+                    <textarea id="emotionTrigger" rows="3" placeholder="Descreva a situação... (opcional)"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label>Sensações físicas</label>
-                    <textarea id="physicalSensations" rows="3" placeholder="O que você sente no corpo?"></textarea>
+                    <textarea id="physicalSensations" rows="2" placeholder="O que você sente no corpo? (opcional)"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label>Pensamentos</label>
-                    <textarea id="emotionThoughts" rows="3" placeholder="O que passa pela sua mente?"></textarea>
+                    <textarea id="emotionThoughts" rows="2" placeholder="O que passa pela sua mente? (opcional)"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label>Impulso de ação</label>
-                    <textarea id="actionUrge" rows="3" placeholder="O que você tem vontade de fazer?"></textarea>
+                    <textarea id="actionUrge" rows="2" placeholder="O que você tem vontade de fazer? (opcional)"></textarea>
                 </div>
 
-                <button class="btn btn-success" onclick="saveEmotionLog()">Registrar Emoção</button>
+                <button class="btn btn-success" onclick="saveEmotion()">Registrar Emoção</button>
 
-                <h3 style="margin-top: 30px;">Histórico de Emoções</h3>
+                <h3 style="margin-top: 30px;">Histórico de Emoções (últimas 10)</h3>
                 <div id="emotionHistory"></div>
             </div>
 
             <!-- Routine Tab -->
             <div id="routine" class="tab-content">
-                <h2>Minha Rotina</h2>
-                
-                <div class="timeline">
-                    <div class="timeline-item">
-                        <span class="timeline-time">08:00</span>
-                        <div class="timeline-content" onclick="toggleComplete(this)">
-                            <strong>Acordar e tomar café</strong>
-                            <p>Cuidar dos cachorros</p>
-                        </div>
+                <h2>Minha Rotina Diária</h2>
+
+                <div class="dashboard-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3>Progresso do Dia</h3>
+                        <button class="btn btn-danger" style="padding: 8px 16px;" onclick="resetRoutine()">Resetar</button>
                     </div>
-                    <div class="timeline-item">
-                        <span class="timeline-time">08:30</span>
-                        <div class="timeline-content" onclick="toggleComplete(this)">
-                            <strong>Caminhada</strong>
-                            <p>30 minutos de atividade física</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <span class="timeline-time">09:00</span>
-                        <div class="timeline-content" onclick="toggleComplete(this)">
-                            <strong>Estudo/Trabalho</strong>
-                            <p>Foco nas atividades principais</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <span class="timeline-time">12:00</span>
-                        <div class="timeline-content" onclick="toggleComplete(this)">
-                            <strong>Almoço</strong>
-                            <p>Pausa para refeição</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <span class="timeline-time">13:00</span>
-                        <div class="timeline-content" onclick="toggleComplete(this)">
-                            <strong>Trabalho/Estudo</strong>
-                            <p>Continuar projetos</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <span class="timeline-time">16:00</span>
-                        <div class="timeline-content" onclick="toggleComplete(this)">
-                            <strong>Cuidar dos cachorros</strong>
-                            <p>Momento de pausa e cuidado</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <span class="timeline-time">18:00</span>
-                        <div class="timeline-content" onclick="toggleComplete(this)">
-                            <strong>Estudo</strong>
-                            <p>Revisão e aprendizado</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <span class="timeline-time">22:00</span>
-                        <div class="timeline-content" onclick="toggleComplete(this)">
-                            <strong>Jantar</strong>
-                            <p>Refeição noturna</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <span class="timeline-time">23:00</span>
-                        <div class="timeline-content" onclick="toggleComplete(this)">
-                            <strong>Mindfulness Formal</strong>
-                            <p>Prática antes de dormir</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <span class="timeline-time">01:00</span>
-                        <div class="timeline-content" onclick="toggleComplete(this)">
-                            <strong>Dormir</strong>
-                            <p>Descanso necessário</p>
-                        </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="routineProgress" style="width: 0%">0%</div>
                     </div>
                 </div>
 
-                <button class="btn" onclick="resetRoutine()">Resetar Dia</button>
+                <div id="routineActivities" style="margin-top: 20px;">
+                    <!-- Activities will be rendered here -->
+                </div>
             </div>
 
-            <!-- DBT Skills Tab -->
+            <!-- Skills Tab -->
             <div id="skills" class="tab-content">
                 <h2>Habilidades DBT</h2>
-                
-                <div class="skills-grid">
-                    <div class="skill-card" onclick="openSkillModal('dearman')">
-                        <div class="skill-header">
-                            <h3>DEAR MAN</h3>
-                            <span class="skill-badge">Efetividade Interpessoal</span>
-                        </div>
-                        <p>Técnica para pedir o que precisa de forma efetiva</p>
+
+                <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                    <div class="dashboard-card" style="cursor: pointer; transition: transform 0.3s;" onclick="showSkillDetails('dearman')">
+                        <h3 style="margin-bottom: 10px;">📢 DEAR MAN</h3>
+                        <p style="font-size: 14px; color: #666;">Efetividade Interpessoal</p>
+                        <p style="margin-top: 10px; font-size: 13px;">Técnica para pedir o que você precisa de forma efetiva</p>
                     </div>
 
-                    <div class="skill-card" onclick="openSkillModal('accepts')">
-                        <div class="skill-header">
-                            <h3>ACCEPTS</h3>
-                            <span class="skill-badge">Tolerância ao Mal-estar</span>
-                        </div>
-                        <p>Distrair-se de emoções intensas</p>
+                    <div class="dashboard-card" style="cursor: pointer; transition: transform 0.3s;" onclick="showSkillDetails('tipp')">
+                        <h3 style="margin-bottom: 10px;">❄️ TIPP</h3>
+                        <p style="font-size: 14px; color: #666;">Habilidades de Crise</p>
+                        <p style="margin-top: 10px; font-size: 13px;">Mudar a química corporal rapidamente</p>
                     </div>
 
-                    <div class="skill-card" onclick="openSkillModal('tipp')">
-                        <div class="skill-header">
-                            <h3>TIPP</h3>
-                            <span class="skill-badge">Crise</span>
-                        </div>
-                        <p>Mudar química corporal rapidamente</p>
+                    <div class="dashboard-card" style="cursor: pointer; transition: transform 0.3s;" onclick="showSkillDetails('stop')">
+                        <h3 style="margin-bottom: 10px;">🛑 STOP</h3>
+                        <p style="font-size: 14px; color: #666;">Regulação Emocional</p>
+                        <p style="margin-top: 10px; font-size: 13px;">Pausar antes de agir impulsivamente</p>
                     </div>
 
-                    <div class="skill-card" onclick="openSkillModal('stop')">
-                        <div class="skill-header">
-                            <h3>STOP</h3>
-                            <span class="skill-badge">Regulação Emocional</span>
-                        </div>
-                        <p>Pausar antes de agir impulsivamente</p>
+                    <div class="dashboard-card" style="cursor: pointer; transition: transform 0.3s;" onclick="showSkillDetails('accepts')">
+                        <h3 style="margin-bottom: 10px;">✅ ACCEPTS</h3>
+                        <p style="font-size: 14px; color: #666;">Tolerância ao Mal-estar</p>
+                        <p style="margin-top: 10px; font-size: 13px;">Distrair-se de emoções intensas</p>
                     </div>
                 </div>
 
-                <h3 style="margin-top: 30px;">Minha Carta ACCEPTS</h3>
-                <div class="form-group">
-                    <label>Atividades que me distraem:</label>
-                    <textarea id="acceptsActivities" rows="2" placeholder="Ex: Jogar, assistir série, programar..."></textarea>
+                <div class="dashboard-card" style="margin-top: 30px;">
+                    <h3>Minha Carta ACCEPTS Personalizada</h3>
+                    <p style="margin-bottom: 15px; font-size: 14px; color: #666;">Preencha com estratégias que funcionam para você</p>
+
+                    <div class="form-group">
+                        <label>Activities - Atividades que me distraem</label>
+                        <textarea id="acceptsActivities" rows="2" placeholder="Ex: Jogar, programar, assistir série..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Contributing - Formas de contribuir</label>
+                        <textarea id="acceptsContribute" rows="2" placeholder="Ex: Ajudar alguém, fazer algo útil..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Comparisons - Comparações úteis</label>
+                        <textarea id="acceptsCompare" rows="2" placeholder="Ex: Lembrar de momentos piores que superei..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Emotions - Emoções opostas</label>
+                        <textarea id="acceptsEmotions" rows="2" placeholder="Ex: Assistir comédia quando triste..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Pushing away - Afastar pensamentos</label>
+                        <textarea id="acceptsPushing" rows="2" placeholder="Ex: Visualizar guardar preocupações em uma caixa..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Thoughts - Outros pensamentos</label>
+                        <textarea id="acceptsThoughts" rows="2" placeholder="Ex: Contar de 100 a 0, resolver quebra-cabeça..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sensations - Sensações físicas intensas</label>
+                        <textarea id="acceptsSensations" rows="2" placeholder="Ex: Água gelada no rosto, segurar gelo..."></textarea>
+                    </div>
+
+                    <button class="btn btn-success" onclick="saveAcceptsCard()">Salvar Carta ACCEPTS</button>
                 </div>
-                <div class="form-group">
-                    <label>Formas de contribuir:</label>
-                    <textarea id="acceptsContribute" rows="2" placeholder="Ex: Ajudar alguém, fazer algo útil..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Comparações úteis:</label>
-                    <textarea id="acceptsCompare" rows="2" placeholder="Ex: Lembrar de momentos piores que superei..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Emoções opostas:</label>
-                    <textarea id="acceptsEmotions" rows="2" placeholder="Ex: Assistir comédia quando triste..."></textarea>
-                </div>
-                <button class="btn btn-success" onclick="saveAccepts()">Salvar ACCEPTS</button>
             </div>
 
             <!-- Mindfulness Tab -->
             <div id="mindfulness" class="tab-content">
-                <h2>Prática de Mindfulness</h2>
-                
-                <div class="dashboard-card" style="text-align: center;">
-                    <h3>Timer de Meditação</h3>
-                    <div class="timer-display" id="timerDisplay">00:00</div>
-                    <div class="timer-controls">
-                        <button class="btn" onclick="setTimer(5)">5 min</button>
-                        <button class="btn" onclick="setTimer(10)">10 min</button>
-                        <button class="btn" onclick="setTimer(15)">15 min</button>
-                        <button class="btn" onclick="setTimer(20)">20 min</button>
-                    </div>
-                    <div class="timer-controls" style="margin-top: 15px;">
-                        <button class="btn btn-success" onclick="startTimer()">Iniciar</button>
-                        <button class="btn btn-danger" onclick="stopTimer()">Parar</button>
-                    </div>
-                </div>
+                <h2>Práticas de Mindfulness</h2>
 
                 <div class="dashboard-card">
-                    <h3>Registro de Prática</h3>
+                    <h3>Registrar Nova Prática</h3>
+
                     <div class="form-group">
-                        <label>Tipo de Prática</label>
-                        <select id="mindfulnessType">
-                            <option value="formal">Formal (sentado)</option>
-                            <option value="informal">Informal (durante atividade)</option>
-                            <option value="breathing">Respiração</option>
-                            <option value="body-scan">Escaneamento corporal</option>
-                            <option value="walking">Caminhada consciente</option>
+                        <label>Tipo de Prática *</label>
+                        <select id="practiceType">
+                            <option value="">Selecione...</option>
+                            <option value="formal">Meditação Formal (sentado)</option>
+                            <option value="informal">Mindfulness Informal</option>
+                            <option value="breathing">Exercício de Respiração</option>
+                            <option value="body-scan">Escaneamento Corporal</option>
+                            <option value="walking">Caminhada Consciente</option>
+                            <option value="eating">Alimentação Consciente</option>
                         </select>
+                        <div class="field-error" id="practiceTypeError">Selecione um tipo de prática</div>
                     </div>
+
                     <div class="form-group">
-                        <label>Duração (minutos)</label>
-                        <input type="number" id="mindfulnessDuration" min="1" placeholder="Ex: 10">
+                        <label>Duração (minutos) *</label>
+                        <input type="number" id="practiceDuration" min="1" max="120" placeholder="Ex: 10">
+                        <div class="field-error" id="practiceDurationError">Insira a duração</div>
                     </div>
+
                     <div class="form-group">
                         <label>Como foi a experiência?</label>
-                        <textarea id="mindfulnessNotes" rows="3" placeholder="Descreva sua prática..."></textarea>
+                        <textarea id="practiceNotes" rows="3" placeholder="Descreva sua prática... (opcional)"></textarea>
                     </div>
-                    <button class="btn btn-success" onclick="saveMindfulness()">Registrar Prática</button>
+
+                    <button class="btn btn-success" onclick="savePractice()">Registrar Prática</button>
                 </div>
 
-                <h3>Histórico de Práticas</h3>
-                <div id="mindfulnessHistory"></div>
+                <h3 style="margin-top: 30px;">Histórico de Práticas</h3>
+                <div id="practiceHistory">Carregando...</div>
+
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h3>Estatísticas de Mindfulness</h3>
+                    <div id="practiceStats">Carregando...</div>
+                </div>
             </div>
 
-            <!-- Notes Tab -->
-            <div id="notes" class="tab-content">
-                <h2>Anotações das Sessões</h2>
-                
-                <div class="form-group">
-                    <label>Data da Sessão</label>
-                    <input type="date" id="sessionDate">
-                </div>
-                
-                <div class="form-group">
-                    <label>Resumo da Sessão</label>
-                    <textarea id="sessionSummary" rows="4" placeholder="O que foi discutido..."></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label>Tarefas para Casa</label>
-                    <textarea id="sessionHomework" rows="4" placeholder="- Tarefa 1&#10;- Tarefa 2&#10;- Tarefa 3"></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label>Insights Importantes</label>
-                    <textarea id="sessionInsights" rows="3" placeholder="O que aprendi..."></textarea>
-                </div>
-                
-                <button class="btn btn-success" onclick="saveSession()">Salvar Anotações</button>
-                
-                <h3 style="margin-top: 30px;">Sessões Anteriores</h3>
-                <div id="sessionHistory"></div>
-            </div>
+            <!-- Sessions Tab -->
+            <div id="sessions" class="tab-content">
+                <h2>Anotações de Sessões Terapêuticas</h2>
 
-            <!-- Rewards Tab -->
-            <div id="rewards" class="tab-content">
-                <h2>Sistema de Recompensas</h2>
-                
                 <div class="dashboard-card">
-                    <h3>Seus Pontos: <span id="rewardPoints">0</span></h3>
-                    <p>Complete atividades para ganhar pontos!</p>
-                </div>
+                    <h3>Registrar Nova Sessão</h3>
 
-                <h3>Adicionar Nova Recompensa</h3>
-                <div class="form-group">
-                    <label>Nome da Recompensa</label>
-                    <input type="text" id="rewardName" placeholder="Ex: Assistir um episódio da série favorita">
-                </div>
-                <div class="form-group">
-                    <label>Custo em Pontos</label>
-                    <input type="number" id="rewardCost" min="1" placeholder="Ex: 10">
-                </div>
-                <button class="btn btn-success" onclick="addReward()">Adicionar Recompensa</button>
-
-                <h3 style="margin-top: 30px;">Recompensas Disponíveis</h3>
-                <div class="rewards-container" id="rewardsContainer"></div>
-
-                <h3 style="margin-top: 30px;">Lista de Comportamentos</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div class="dashboard-card">
-                        <h4>😊 Comportamentos que Gosto</h4>
-                        <textarea id="likedBehaviors" rows="5" placeholder="- Acordar no horário&#10;- Fazer exercício&#10;- Estudar programação"></textarea>
-                        <button class="btn btn-success" onclick="saveBehaviors()">Salvar</button>
+                    <div class="form-group">
+                        <label>Data da Sessão *</label>
+                        <input type="date" id="sessionDate">
+                        <div class="field-error" id="sessionDateError">Selecione uma data</div>
                     </div>
-                    <div class="dashboard-card">
-                        <h4>😕 Comportamentos que Não Gosto</h4>
-                        <textarea id="dislikedBehaviors" rows="5" placeholder="- Dormir tarde&#10;- Pular refeições&#10;- Procrastinar"></textarea>
-                        <button class="btn btn-success" onclick="saveBehaviors()">Salvar</button>
+
+                    <div class="form-group">
+                        <label>Resumo da Sessão *</label>
+                        <textarea id="sessionSummary" rows="4" placeholder="O que foi discutido na sessão..."></textarea>
+                        <div class="field-error" id="sessionSummaryError">Adicione um resumo</div>
                     </div>
+
+                    <div class="form-group">
+                        <label>Tarefas para Casa</label>
+                        <textarea id="sessionHomework" rows="3" placeholder="- Tarefa 1&#10;- Tarefa 2&#10;- Tarefa 3 (opcional)"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Insights Importantes</label>
+                        <textarea id="sessionInsights" rows="3" placeholder="Percepções e aprendizados... (opcional)"></textarea>
+                    </div>
+
+                    <button class="btn btn-success" onclick="saveSession()">Salvar Sessão</button>
+                </div>
+
+                <h3 style="margin-top: 30px;">Sessões Anteriores</h3>
+                <div id="sessionHistory">Carregando...</div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings" class="tab-content">
+                <h2>Configurações e Backup</h2>
+
+                <div class="dashboard-card">
+                    <h3>Gestão de Dados</h3>
+                    <p><strong>Sistema de persistência:</strong> localStorage + IndexedDB</p>
+                    <p id="storageInfo">Carregando informações...</p>
+
+                    <div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
+                        <button class="btn btn-success" onclick="exportBackup()">📥 Baixar Backup JSON</button>
+                        <button class="btn btn-secondary" onclick="document.getElementById('restoreInput').click()">📤 Restaurar Backup</button>
+                        <button class="btn" style="background: #ff6b6b;" onclick="exportPDF()">📄 Gerar Relatório PDF</button>
+                        <input type="file" id="restoreInput" accept=".json" style="display: none;" onchange="restoreBackup(event)">
+                    </div>
+                </div>
+
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h3>Estatísticas</h3>
+                    <div id="stats">Carregando...</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal for DBT Skills -->
+    <!-- Quick Mood Modal -->
+    <div id="quickMoodModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Registro Rápido</h2>
+                <span class="close-modal" onclick="closeQuickModal()">&times;</span>
+            </div>
+            <p>Humor salvo com sucesso! 🎉</p>
+        </div>
+    </div>
+
+    <!-- Skill Details Modal -->
     <div id="skillModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="skillTitle"></h2>
-                <span class="close-modal" onclick="closeModal()">&times;</span>
+                <h2 id="skillModalTitle">Habilidade DBT</h2>
+                <span class="close-modal" onclick="closeSkillModal()">&times;</span>
             </div>
-            <div id="skillContent"></div>
+            <div id="skillModalContent">
+                <!-- Content will be injected here -->
+            </div>
         </div>
     </div>
 
-    <!-- Floating Action Button -->
-    <div class="fab" onclick="quickAdd()">+</div>
-
     <script>
-        // Initialize app
-        let currentMood = null;
-        let timerInterval = null;
-        let timerSeconds = 0;
-        let points = parseInt(localStorage.getItem('rewardPoints') || '0');
+        // ============================================================================
+        // DATA SCHEMA & VALIDATION
+        // ============================================================================
 
-        // Load saved data on startup
-        window.onload = function() {
-            loadAllData();
-            updateDate();
-            updateProgress();
-            loadMindfulnessHistory();
-            loadEmotionHistory();
-            loadSessionHistory();
-            loadRewards();
-            updatePointsDisplay();
+        const Schema = {
+            // Mood entry schema
+            Mood: {
+                validate(data) {
+                    if (!data.value || data.value < 1 || data.value > 5) {
+                        return { valid: false, error: 'Valor de humor inválido (1-5)' };
+                    }
+                    return { valid: true };
+                },
+                create(value, note = '') {
+                    return {
+                        id: generateId(),
+                        value: parseInt(value),
+                        note: note.trim(),
+                        timestamp: new Date().toISOString(),
+                        date: new Date().toISOString().split('T')[0]
+                    };
+                }
+            },
+
+            // Emotion entry schema
+            Emotion: {
+                validate(data) {
+                    if (!data.type || data.type.trim() === '') {
+                        return { valid: false, error: 'Tipo de emoção é obrigatório' };
+                    }
+                    if (data.intensity === undefined || data.intensity < 0 || data.intensity > 10) {
+                        return { valid: false, error: 'Intensidade inválida (0-10)' };
+                    }
+                    return { valid: true };
+                },
+                create(type, intensity, details = {}) {
+                    return {
+                        id: generateId(),
+                        type: type.trim(),
+                        intensity: parseInt(intensity),
+                        trigger: (details.trigger || '').trim(),
+                        physical: (details.physical || '').trim(),
+                        thoughts: (details.thoughts || '').trim(),
+                        urge: (details.urge || '').trim(),
+                        timestamp: new Date().toISOString(),
+                        date: new Date().toISOString().split('T')[0]
+                    };
+                }
+            },
+
+            // Mindfulness practice schema
+            Practice: {
+                validate(data) {
+                    if (!data.type || data.type.trim() === '') {
+                        return { valid: false, error: 'Tipo de prática é obrigatório' };
+                    }
+                    if (!data.duration || data.duration < 1) {
+                        return { valid: false, error: 'Duração deve ser maior que 0' };
+                    }
+                    return { valid: true };
+                },
+                create(type, duration, notes = '') {
+                    return {
+                        id: generateId(),
+                        type: type.trim(),
+                        duration: parseInt(duration),
+                        notes: notes.trim(),
+                        timestamp: new Date().toISOString(),
+                        date: new Date().toISOString().split('T')[0]
+                    };
+                }
+            },
+
+            // Session notes schema
+            Session: {
+                validate(data) {
+                    if (!data.date || data.date.trim() === '') {
+                        return { valid: false, error: 'Data da sessão é obrigatória' };
+                    }
+                    if (!data.summary || data.summary.trim() === '') {
+                        return { valid: false, error: 'Resumo da sessão é obrigatório' };
+                    }
+                    return { valid: true };
+                },
+                create(date, summary, homework = '', insights = '') {
+                    return {
+                        id: generateId(),
+                        date: date,
+                        summary: summary.trim(),
+                        homework: homework.trim(),
+                        insights: insights.trim(),
+                        timestamp: new Date().toISOString()
+                    };
+                }
+            }
         };
 
-        // Theme toggle
-        function toggleTheme() {
-            document.body.classList.toggle('dark-mode');
-            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
-        }
+        // ============================================================================
+        // DUAL PERSISTENCE LAYER (localStorage + IndexedDB)
+        // ============================================================================
 
-        // Load theme preference
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.body.classList.add('dark-mode');
-        }
+        class DataStore {
+            constructor() {
+                this.db = null;
+                this.dbName = 'TherapyAppDB';
+                this.dbVersion = 1;
+                this.ready = false;
+            }
 
-        // Update current date
-        function updateDate() {
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('pt-BR', options);
-        }
+            async init() {
+                try {
+                    // Initialize IndexedDB
+                    this.db = await this.openDatabase();
+                    this.ready = true;
+                    console.log('✅ IndexedDB initialized');
 
-        // Tab switching
-        function switchTab(tabName, trigger) {
-            // Show only the selected tab
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.toggle('active', tab.id === tabName);
-            });
-            
-            const navTabs = document.querySelectorAll('.nav-tab');
-            navTabs.forEach(nav => nav.classList.remove('active'));
-            
-            if (trigger && trigger.classList) {
-                trigger.classList.add('active');
-            } else {
-                const matchingNav = Array.from(navTabs).find(nav => nav.dataset.tab === tabName);
-                if (matchingNav) {
-                    matchingNav.classList.add('active');
+                    // Migrate old localStorage data if needed
+                    await this.migrateOldData();
+
+                    return true;
+                } catch (error) {
+                    console.error('❌ IndexedDB initialization failed:', error);
+                    console.log('⚠️ Falling back to localStorage only');
+                    this.ready = false;
+                    return false;
                 }
+            }
+
+            openDatabase() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(this.dbName, this.dbVersion);
+
+                    request.onerror = () => reject(request.error);
+                    request.onsuccess = () => resolve(request.result);
+
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+
+                        // Create object stores
+                        if (!db.objectStoreNames.contains('moods')) {
+                            const moodStore = db.createObjectStore('moods', { keyPath: 'id' });
+                            moodStore.createIndex('date', 'date', { unique: false });
+                            moodStore.createIndex('timestamp', 'timestamp', { unique: false });
+                        }
+
+                        if (!db.objectStoreNames.contains('emotions')) {
+                            const emotionStore = db.createObjectStore('emotions', { keyPath: 'id' });
+                            emotionStore.createIndex('date', 'date', { unique: false });
+                            emotionStore.createIndex('type', 'type', { unique: false });
+                        }
+
+                        if (!db.objectStoreNames.contains('practices')) {
+                            const practiceStore = db.createObjectStore('practices', { keyPath: 'id' });
+                            practiceStore.createIndex('date', 'date', { unique: false });
+                        }
+
+                        if (!db.objectStoreNames.contains('sessions')) {
+                            const sessionStore = db.createObjectStore('sessions', { keyPath: 'id' });
+                            sessionStore.createIndex('date', 'date', { unique: false });
+                        }
+
+                        if (!db.objectStoreNames.contains('metadata')) {
+                            db.createObjectStore('metadata', { keyPath: 'key' });
+                        }
+                    };
+                });
+            }
+
+            async save(storeName, data) {
+                // Save to localStorage (primary)
+                try {
+                    const key = `therapy_${storeName}`;
+                    let items = JSON.parse(localStorage.getItem(key) || '[]');
+                    items.push(data);
+                    localStorage.setItem(key, JSON.stringify(items));
+                } catch (error) {
+                    console.error('localStorage save error:', error);
+                    throw new Error('Falha ao salvar em localStorage');
+                }
+
+                // Save to IndexedDB (backup)
+                if (this.ready && this.db) {
+                    try {
+                        await this.saveToIndexedDB(storeName, data);
+                    } catch (error) {
+                        console.warn('IndexedDB save warning:', error);
+                        // Don't throw - localStorage is primary
+                    }
+                }
+
+                return data;
+            }
+
+            saveToIndexedDB(storeName, data) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction([storeName], 'readwrite');
+                    const store = transaction.objectStore(storeName);
+                    const request = store.add(data);
+
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            async getAll(storeName) {
+                // Try localStorage first
+                try {
+                    const key = `therapy_${storeName}`;
+                    const data = JSON.parse(localStorage.getItem(key) || '[]');
+                    return data;
+                } catch (error) {
+                    console.error('localStorage read error:', error);
+
+                    // Fallback to IndexedDB
+                    if (this.ready && this.db) {
+                        return await this.getAllFromIndexedDB(storeName);
+                    }
+
+                    return [];
+                }
+            }
+
+            getAllFromIndexedDB(storeName) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction([storeName], 'readonly');
+                    const store = transaction.objectStore(storeName);
+                    const request = store.getAll();
+
+                    request.onsuccess = () => resolve(request.result || []);
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            async setMetadata(key, value) {
+                localStorage.setItem(`therapy_meta_${key}`, JSON.stringify(value));
+
+                if (this.ready && this.db) {
+                    try {
+                        const transaction = this.db.transaction(['metadata'], 'readwrite');
+                        const store = transaction.objectStore('metadata');
+                        store.put({ key, value, timestamp: new Date().toISOString() });
+                    } catch (error) {
+                        console.warn('Metadata save warning:', error);
+                    }
+                }
+            }
+
+            async getMetadata(key) {
+                try {
+                    const value = localStorage.getItem(`therapy_meta_${key}`);
+                    return value ? JSON.parse(value) : null;
+                } catch (error) {
+                    return null;
+                }
+            }
+
+            async migrateOldData() {
+                // Migrate from old format to new normalized schema
+                const oldMoods = localStorage.getItem('moods');
+                const oldEmotions = localStorage.getItem('emotions');
+
+                if (oldMoods && !localStorage.getItem('therapy_moods')) {
+                    console.log('📦 Migrating old mood data...');
+                    try {
+                        const moods = JSON.parse(oldMoods);
+                        const normalized = moods.map(m => Schema.Mood.create(m.value, ''));
+                        localStorage.setItem('therapy_moods', JSON.stringify(normalized));
+                    } catch (error) {
+                        console.error('Migration error:', error);
+                    }
+                }
+
+                if (oldEmotions && !localStorage.getItem('therapy_emotions')) {
+                    console.log('📦 Migrating old emotion data...');
+                    try {
+                        const emotions = JSON.parse(oldEmotions);
+                        const normalized = emotions.map(e =>
+                            Schema.Emotion.create(e.type, e.intensity, {
+                                trigger: e.trigger,
+                                physical: e.physical,
+                                thoughts: e.thoughts,
+                                urge: e.urge
+                            })
+                        );
+                        localStorage.setItem('therapy_emotions', JSON.stringify(normalized));
+                    } catch (error) {
+                        console.error('Migration error:', error);
+                    }
+                }
+            }
+
+            async exportAll() {
+                const data = {
+                    version: 2,
+                    exportDate: new Date().toISOString(),
+                    moods: await this.getAll('moods'),
+                    emotions: await this.getAll('emotions'),
+                    practices: await this.getAll('practices'),
+                    sessions: await this.getAll('sessions'),
+                    metadata: {
+                        lastBackup: await this.getMetadata('lastBackup'),
+                        darkMode: await this.getMetadata('darkMode')
+                    }
+                };
+                return data;
+            }
+
+            async importAll(data) {
+                if (!data.version || data.version < 2) {
+                    throw new Error('Formato de backup incompatível');
+                }
+
+                // Clear existing data
+                localStorage.removeItem('therapy_moods');
+                localStorage.removeItem('therapy_emotions');
+                localStorage.removeItem('therapy_practices');
+                localStorage.removeItem('therapy_sessions');
+
+                // Import new data
+                if (data.moods) localStorage.setItem('therapy_moods', JSON.stringify(data.moods));
+                if (data.emotions) localStorage.setItem('therapy_emotions', JSON.stringify(data.emotions));
+                if (data.practices) localStorage.setItem('therapy_practices', JSON.stringify(data.practices));
+                if (data.sessions) localStorage.setItem('therapy_sessions', JSON.stringify(data.sessions));
+
+                // Import metadata
+                if (data.metadata) {
+                    for (const [key, value] of Object.entries(data.metadata)) {
+                        if (value !== null) await this.setMetadata(key, value);
+                    }
+                }
+
+                // Sync to IndexedDB
+                if (this.ready && this.db) {
+                    // Clear IndexedDB stores
+                    const stores = ['moods', 'emotions', 'practices', 'sessions'];
+                    for (const store of stores) {
+                        await this.clearStore(store);
+                        const items = data[store] || [];
+                        for (const item of items) {
+                            await this.saveToIndexedDB(store, item);
+                        }
+                    }
+                }
+
+                return true;
+            }
+
+            clearStore(storeName) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction([storeName], 'readwrite');
+                    const store = transaction.objectStore(storeName);
+                    const request = store.clear();
+
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
             }
         }
 
-        // Mood tracking
+        // ============================================================================
+        // APPLICATION STATE
+        // ============================================================================
+
+        const App = {
+            store: new DataStore(),
+            currentMood: null,
+
+            async init() {
+                console.log('🚀 Initializing Therapy App v2...');
+
+                // Initialize data store
+                await this.store.init();
+
+                // Load theme
+                const darkMode = await this.store.getMetadata('darkMode');
+                if (darkMode) {
+                    document.body.classList.add('dark-mode');
+                }
+
+                // Update UI
+                updateDate();
+                await this.updateDashboard();
+                await this.loadEmotionHistory();
+                await this.updateBackupBadge();
+                await this.updateStats();
+
+                // Render charts and visualizations
+                await this.renderMoodChart(this.currentPeriod);
+                await this.updateWeeklyComparison();
+                await this.renderEmotionHeatmap();
+
+                // Load practice and session data
+                await this.loadPracticeHistory();
+                await this.updatePracticeStats();
+                await this.loadSessionHistory();
+
+                // Load routine and ACCEPTS card
+                await renderRoutine();
+                await loadAcceptsCard();
+
+                document.getElementById('dataStatus').textContent =
+                    this.store.ready ? '✅ Persistência ativa' : '⚠️ Apenas localStorage';
+
+                console.log('✅ App initialized');
+            },
+
+            async updateDashboard() {
+                const today = new Date().toISOString().split('T')[0];
+                const moods = await this.store.getAll('moods');
+                const emotions = await this.store.getAll('emotions');
+
+                const todayMoods = moods.filter(m => m.date === today);
+                const todayEmotions = emotions.filter(e => e.date === today);
+
+                const summary = document.getElementById('todaySummary');
+                summary.innerHTML = `
+                    <li>Humor: ${todayMoods.length} registro(s)</li>
+                    <li>Emoções: ${todayEmotions.length} registro(s)</li>
+                `;
+            },
+
+            async loadEmotionHistory() {
+                const emotions = await this.store.getAll('emotions');
+                const historyDiv = document.getElementById('emotionHistory');
+
+                if (emotions.length === 0) {
+                    historyDiv.innerHTML = '<p>Nenhuma emoção registrada ainda.</p>';
+                    return;
+                }
+
+                const recent = emotions.slice(-10).reverse();
+                historyDiv.innerHTML = recent.map(e => `
+                    <div class="emotion-log">
+                        <div class="note-date">${formatDateTime(e.timestamp)}</div>
+                        <strong>${e.type} (Intensidade: ${e.intensity}/10)</strong>
+                        ${e.trigger ? `<p><strong>Gatilho:</strong> ${e.trigger}</p>` : ''}
+                        ${e.thoughts ? `<p><strong>Pensamentos:</strong> ${e.thoughts}</p>` : ''}
+                    </div>
+                `).join('');
+            },
+
+            async updateBackupBadge() {
+                const lastBackup = await this.store.getMetadata('lastBackup');
+                const badge = document.getElementById('backupBadge');
+                const text = document.getElementById('backupText');
+
+                if (!lastBackup) {
+                    text.textContent = 'Backup: nunca';
+                    badge.classList.add('warning');
+                } else {
+                    const days = Math.floor((Date.now() - new Date(lastBackup)) / (1000 * 60 * 60 * 24));
+                    text.textContent = `Backup: ${days === 0 ? 'hoje' : days + 'd atrás'}`;
+                    badge.classList.toggle('warning', days > 7);
+                }
+            },
+
+            async updateStats() {
+                const moods = await this.store.getAll('moods');
+                const emotions = await this.store.getAll('emotions');
+                const practices = await this.store.getAll('practices');
+                const sessions = await this.store.getAll('sessions');
+
+                const statsDiv = document.getElementById('stats');
+                statsDiv.innerHTML = `
+                    <p><strong>Total de registros:</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Humor: ${moods.length}</li>
+                        <li>Emoções: ${emotions.length}</li>
+                        <li>Práticas: ${practices.length}</li>
+                        <li>Sessões: ${sessions.length}</li>
+                    </ul>
+                `;
+
+                const storageInfo = document.getElementById('storageInfo');
+                storageInfo.innerHTML = `
+                    <p style="margin-top: 10px;">
+                        <strong>Status:</strong> ${App.store.ready ?
+                            '✅ localStorage + IndexedDB ativo' :
+                            '⚠️ Apenas localStorage (IndexedDB indisponível)'}
+                    </p>
+                `;
+            },
+
+            moodChart: null,
+            currentPeriod: 7,
+
+            async renderMoodChart(days = 7) {
+                const moods = await this.store.getAll('moods');
+
+                // Get data for the last N days
+                const endDate = new Date();
+                const startDate = new Date();
+                startDate.setDate(startDate.getDate() - days);
+
+                // Create labels for all days in range
+                const labels = [];
+                const dataPoints = [];
+
+                for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                    const dateStr = d.toISOString().split('T')[0];
+                    labels.push(dateStr);
+
+                    // Get average mood for this day
+                    const dayMoods = moods.filter(m => m.date === dateStr);
+                    if (dayMoods.length > 0) {
+                        const avg = dayMoods.reduce((sum, m) => sum + m.value, 0) / dayMoods.length;
+                        dataPoints.push(avg.toFixed(1));
+                    } else {
+                        dataPoints.push(null);
+                    }
+                }
+
+                // Format labels for display (show day/month)
+                const formattedLabels = labels.map(dateStr => {
+                    const date = new Date(dateStr);
+                    return `${date.getDate()}/${date.getMonth() + 1}`;
+                });
+
+                const ctx = document.getElementById('moodChart');
+                if (!ctx) return;
+
+                // Destroy existing chart
+                if (this.moodChart) {
+                    this.moodChart.destroy();
+                }
+
+                this.moodChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: formattedLabels,
+                        datasets: [{
+                            label: 'Humor Médio',
+                            data: dataPoints,
+                            borderColor: '#6b5b95',
+                            backgroundColor: 'rgba(107, 91, 149, 0.1)',
+                            tension: 0.3,
+                            fill: true,
+                            spanGaps: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const emojis = ['', '😔', '😕', '😐', '🙂', '😊'];
+                                        const value = context.parsed.y;
+                                        const rounded = Math.round(value);
+                                        return `${value} ${emojis[rounded] || ''}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                min: 0,
+                                max: 5,
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: function(value) {
+                                        const emojis = ['', '😔', '😕', '😐', '🙂', '😊'];
+                                        return emojis[value] || value;
+                                    }
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        }
+                    }
+                });
+            },
+
+            async updateWeeklyComparison() {
+                const moods = await this.store.getAll('moods');
+                const emotions = await this.store.getAll('emotions');
+
+                const today = new Date();
+
+                // Current week (last 7 days)
+                const weekStart = new Date(today);
+                weekStart.setDate(weekStart.getDate() - 7);
+
+                // Previous week (8-14 days ago)
+                const prevWeekStart = new Date(today);
+                prevWeekStart.setDate(prevWeekStart.getDate() - 14);
+                const prevWeekEnd = new Date(today);
+                prevWeekEnd.setDate(prevWeekEnd.getDate() - 8);
+
+                // Calculate current week stats
+                const currentWeekMoods = moods.filter(m => {
+                    const moodDate = new Date(m.date);
+                    return moodDate >= weekStart && moodDate <= today;
+                });
+
+                const currentWeekEmotions = emotions.filter(e => {
+                    const emotionDate = new Date(e.date);
+                    return emotionDate >= weekStart && emotionDate <= today;
+                });
+
+                // Calculate previous week stats
+                const prevWeekMoods = moods.filter(m => {
+                    const moodDate = new Date(m.date);
+                    return moodDate >= prevWeekStart && moodDate <= prevWeekEnd;
+                });
+
+                const prevWeekEmotions = emotions.filter(e => {
+                    const emotionDate = new Date(e.date);
+                    return emotionDate >= prevWeekStart && emotionDate <= prevWeekEnd;
+                });
+
+                // Calculate averages
+                const currentAvg = currentWeekMoods.length > 0
+                    ? (currentWeekMoods.reduce((sum, m) => sum + m.value, 0) / currentWeekMoods.length).toFixed(1)
+                    : 'N/A';
+
+                const prevAvg = prevWeekMoods.length > 0
+                    ? (prevWeekMoods.reduce((sum, m) => sum + m.value, 0) / prevWeekMoods.length).toFixed(1)
+                    : 'N/A';
+
+                const moodDelta = currentAvg !== 'N/A' && prevAvg !== 'N/A'
+                    ? (currentAvg - prevAvg).toFixed(1)
+                    : 'N/A';
+
+                const moodDeltaSymbol = moodDelta > 0 ? '📈' : moodDelta < 0 ? '📉' : '➡️';
+
+                const comparisonDiv = document.getElementById('comparisonStats');
+                comparisonDiv.innerHTML = `
+                    <p><strong>Humor médio:</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>Semana atual: ${currentAvg} ${moodDeltaSymbol}</li>
+                        <li>Semana anterior: ${prevAvg}</li>
+                        ${moodDelta !== 'N/A' ? `<li>Diferença: ${moodDelta > 0 ? '+' : ''}${moodDelta}</li>` : ''}
+                    </ul>
+                    <p style="margin-top: 10px;"><strong>Registros:</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>Emoções esta semana: ${currentWeekEmotions.length}</li>
+                        <li>Emoções semana anterior: ${prevWeekEmotions.length}</li>
+                    </ul>
+                `;
+            },
+
+            async renderEmotionHeatmap() {
+                const emotions = await this.store.getAll('emotions');
+
+                // Get last 7 days
+                const today = new Date();
+                const sevenDaysAgo = new Date(today);
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+                // Count emotions by type for each day
+                const emotionTypes = ['alegria', 'tristeza', 'raiva', 'medo', 'ansiedade', 'calma', 'frustração', 'esperança', 'vergonha'];
+                const heatmapData = {};
+
+                for (let d = new Date(sevenDaysAgo); d <= today; d.setDate(d.getDate() + 1)) {
+                    const dateStr = d.toISOString().split('T')[0];
+                    heatmapData[dateStr] = {};
+
+                    emotionTypes.forEach(type => {
+                        const count = emotions.filter(e => e.date === dateStr && e.type === type).length;
+                        heatmapData[dateStr][type] = count;
+                    });
+                }
+
+                // Render as simple grid
+                const heatmapDiv = document.getElementById('emotionHeatmap');
+                let html = '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse;">';
+
+                // Header row (days)
+                html += '<tr><th style="padding: 8px; border: 1px solid #ddd;">Emoção</th>';
+                Object.keys(heatmapData).forEach(dateStr => {
+                    const date = new Date(dateStr);
+                    html += `<th style="padding: 8px; border: 1px solid #ddd; font-size: 12px;">${date.getDate()}/${date.getMonth() + 1}</th>`;
+                });
+                html += '</tr>';
+
+                // Data rows (emotions)
+                emotionTypes.forEach(type => {
+                    html += `<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: 500;">${type}</td>`;
+                    Object.values(heatmapData).forEach(dayData => {
+                        const count = dayData[type];
+                        const intensity = count > 0 ? Math.min(count * 30, 100) : 0;
+                        const bgColor = count > 0 ? `rgba(107, 91, 149, ${intensity/100})` : '#f5f5f5';
+                        html += `<td style="padding: 8px; border: 1px solid #ddd; text-align: center; background: ${bgColor};">${count || ''}</td>`;
+                    });
+                    html += '</tr>';
+                });
+
+                html += '</table></div>';
+                html += '<p style="margin-top: 10px; font-size: 12px; color: #666;">Cor mais escura = maior frequência</p>';
+
+                heatmapDiv.innerHTML = html;
+            },
+
+            async loadPracticeHistory() {
+                const practices = await this.store.getAll('practices');
+                const historyDiv = document.getElementById('practiceHistory');
+
+                if (practices.length === 0) {
+                    historyDiv.innerHTML = '<p>Nenhuma prática registrada ainda.</p>';
+                    return;
+                }
+
+                const recent = practices.slice(-10).reverse();
+                historyDiv.innerHTML = recent.map(p => `
+                    <div class="emotion-log" style="border-left-color: #82ca9d;">
+                        <div class="note-date">${formatDateTime(p.timestamp)}</div>
+                        <strong>${p.type} - ${p.duration} minutos</strong>
+                        ${p.notes ? `<p>${p.notes}</p>` : ''}
+                    </div>
+                `).join('');
+            },
+
+            async updatePracticeStats() {
+                const practices = await this.store.getAll('practices');
+                const statsDiv = document.getElementById('practiceStats');
+
+                if (practices.length === 0) {
+                    statsDiv.innerHTML = '<p>Sem práticas registradas.</p>';
+                    return;
+                }
+
+                // Calculate stats
+                const totalMinutes = practices.reduce((sum, p) => sum + parseInt(p.duration), 0);
+                const avgDuration = (totalMinutes / practices.length).toFixed(1);
+
+                // This month
+                const today = new Date();
+                const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                const thisMonthPractices = practices.filter(p => new Date(p.date) >= firstDayOfMonth);
+
+                const typeCount = {};
+                practices.forEach(p => {
+                    typeCount[p.type] = (typeCount[p.type] || 0) + 1;
+                });
+
+                const mostCommon = Object.entries(typeCount).sort((a, b) => b[1] - a[1])[0];
+
+                statsDiv.innerHTML = `
+                    <p><strong>Estatísticas gerais:</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Total de práticas: ${practices.length}</li>
+                        <li>Tempo total: ${totalMinutes} minutos (${(totalMinutes / 60).toFixed(1)}h)</li>
+                        <li>Duração média: ${avgDuration} minutos</li>
+                        <li>Práticas este mês: ${thisMonthPractices.length}</li>
+                        ${mostCommon ? `<li>Tipo mais praticado: ${mostCommon[0]} (${mostCommon[1]}x)</li>` : ''}
+                    </ul>
+                `;
+            },
+
+            async loadSessionHistory() {
+                const sessions = await this.store.getAll('sessions');
+                const historyDiv = document.getElementById('sessionHistory');
+
+                if (sessions.length === 0) {
+                    historyDiv.innerHTML = '<p>Nenhuma sessão registrada ainda.</p>';
+                    return;
+                }
+
+                const recent = sessions.slice(-5).reverse();
+                historyDiv.innerHTML = recent.map(s => `
+                    <div class="note-card">
+                        <div class="note-date">Sessão de ${new Date(s.date).toLocaleDateString('pt-BR')}</div>
+                        <p><strong>Resumo:</strong> ${s.summary}</p>
+                        ${s.homework ? `<p><strong>Tarefas:</strong> ${s.homework}</p>` : ''}
+                        ${s.insights ? `<p><strong>Insights:</strong> ${s.insights}</p>` : ''}
+                    </div>
+                `).join('');
+            },
+
+            async saveRoutineState(state) {
+                const today = new Date().toISOString().split('T')[0];
+                await this.store.setMetadata(`routine_${today}`, state);
+            },
+
+            async loadRoutineState() {
+                const today = new Date().toISOString().split('T')[0];
+                const state = await this.store.getMetadata(`routine_${today}`);
+                return state || {};
+            }
+        };
+
+        // ============================================================================
+        // UI FUNCTIONS
+        // ============================================================================
+
+        function updateDate() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent =
+                new Date().toLocaleDateString('pt-BR', options);
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            App.store.setMetadata('darkMode', document.body.classList.contains('dark-mode'));
+        }
+
+        function switchTab(tabName, trigger) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.toggle('active', tab.id === tabName);
+            });
+
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(nav => nav.classList.remove('active'));
+
+            if (trigger) {
+                trigger.classList.add('active');
+            }
+        }
+
         function selectMood(value, element) {
             document.querySelectorAll('.mood-emoji').forEach(emoji => {
                 emoji.classList.remove('selected');
             });
             element.classList.add('selected');
-            currentMood = value;
+            App.currentMood = value;
         }
 
-        function saveMood() {
-            if (!currentMood) {
-                alert('Por favor, selecione um humor primeiro!');
+        async function saveMood() {
+            if (!App.currentMood) {
+                showNotification('Selecione um humor primeiro!', 'error');
                 return;
             }
-            
-            const moodData = {
-                value: currentMood,
-                timestamp: new Date().toISOString()
-            };
-            
-            let moods = JSON.parse(localStorage.getItem('moods') || '[]');
-            moods.push(moodData);
-            localStorage.setItem('moods', JSON.stringify(moods));
-            
-            celebrate();
-            addPoints(5);
-            alert('Humor registrado com sucesso!');
-        }
 
-        // Emotion tracking
-        document.getElementById('emotionIntensity').addEventListener('input', function() {
-            document.getElementById('intensityValue').textContent = this.value;
-        });
+            const note = document.getElementById('moodNote').value;
+            const mood = Schema.Mood.create(App.currentMood, note);
 
-        function saveEmotionLog() {
-            const emotion = {
-                type: document.getElementById('emotionType').value,
-                intensity: document.getElementById('emotionIntensity').value,
-                trigger: document.getElementById('emotionTrigger').value,
-                physical: document.getElementById('physicalSensations').value,
-                thoughts: document.getElementById('emotionThoughts').value,
-                urge: document.getElementById('actionUrge').value,
-                timestamp: new Date().toISOString()
-            };
-            
-            if (!emotion.type) {
-                alert('Por favor, selecione uma emoção!');
+            const validation = Schema.Mood.validate(mood);
+            if (!validation.valid) {
+                showNotification(validation.error, 'error');
                 return;
             }
-            
-            let emotions = JSON.parse(localStorage.getItem('emotions') || '[]');
-            emotions.push(emotion);
-            localStorage.setItem('emotions', JSON.stringify(emotions));
-            
-            // Clear form
-            document.getElementById('emotionType').value = '';
-            document.getElementById('emotionIntensity').value = 5;
-            document.getElementById('intensityValue').textContent = '5';
-            document.getElementById('emotionTrigger').value = '';
-            document.getElementById('physicalSensations').value = '';
-            document.getElementById('emotionThoughts').value = '';
-            document.getElementById('actionUrge').value = '';
-            
-            loadEmotionHistory();
-            addPoints(10);
-            alert('Emoção registrada com sucesso!');
-        }
 
-        function loadEmotionHistory() {
-            const emotions = JSON.parse(localStorage.getItem('emotions') || '[]');
-            const historyDiv = document.getElementById('emotionHistory');
-            
-            if (emotions.length === 0) {
-                historyDiv.innerHTML = '<p>Nenhuma emoção registrada ainda.</p>';
-                return;
-            }
-            
-            historyDiv.innerHTML = emotions.slice(-5).reverse().map(emotion => `
-                <div class="emotion-log">
-                    <div class="note-date">${new Date(emotion.timestamp).toLocaleString('pt-BR')}</div>
-                    <strong>${emotion.type} (Intensidade: ${emotion.intensity}/10)</strong>
-                    ${emotion.trigger ? `<p><strong>Gatilho:</strong> ${emotion.trigger}</p>` : ''}
-                    ${emotion.thoughts ? `<p><strong>Pensamentos:</strong> ${emotion.thoughts}</p>` : ''}
-                </div>
-            `).join('');
-        }
+            try {
+                await App.store.save('moods', mood);
+                showNotification('Humor registrado com sucesso! 🎉', 'success');
 
-        // Routine management
-        function toggleComplete(element) {
-            element.classList.toggle('completed');
-            updateProgress();
-            if (element.classList.contains('completed')) {
-                addPoints(2);
+                // Clear form
+                document.querySelectorAll('.mood-emoji').forEach(e => e.classList.remove('selected'));
+                document.getElementById('moodNote').value = '';
+                App.currentMood = null;
+
+                // Update all visualizations
+                await App.updateDashboard();
+                await App.renderMoodChart(App.currentPeriod);
+                await App.updateWeeklyComparison();
+            } catch (error) {
+                showNotification('Erro ao salvar: ' + error.message, 'error');
             }
         }
 
-        function updateProgress() {
-            const total = document.querySelectorAll('.timeline-content').length;
-            const completed = document.querySelectorAll('.timeline-content.completed').length;
-            const percentage = Math.round((completed / total) * 100);
-            
-            document.getElementById('dailyProgress').style.width = percentage + '%';
-            document.getElementById('dailyProgress').textContent = percentage + '%';
-            document.getElementById('completedCount').textContent = completed;
-        }
+        async function saveEmotion() {
+            const type = document.getElementById('emotionType').value;
+            const intensity = document.getElementById('emotionIntensity').value;
+            const trigger = document.getElementById('emotionTrigger').value;
+            const physical = document.getElementById('physicalSensations').value;
+            const thoughts = document.getElementById('emotionThoughts').value;
+            const urge = document.getElementById('actionUrge').value;
 
-        function resetRoutine() {
-            document.querySelectorAll('.timeline-content').forEach(item => {
-                item.classList.remove('completed');
+            const emotion = Schema.Emotion.create(type, intensity, {
+                trigger, physical, thoughts, urge
             });
-            updateProgress();
+
+            const validation = Schema.Emotion.validate(emotion);
+            if (!validation.valid) {
+                showFieldError('emotionType', validation.error);
+                return;
+            }
+
+            try {
+                await App.store.save('emotions', emotion);
+                showNotification('Emoção registrada com sucesso! 🎉', 'success');
+
+                // Clear form
+                document.getElementById('emotionType').value = '';
+                document.getElementById('emotionIntensity').value = 5;
+                document.getElementById('intensityValue').textContent = '5';
+                document.getElementById('emotionTrigger').value = '';
+                document.getElementById('physicalSensations').value = '';
+                document.getElementById('emotionThoughts').value = '';
+                document.getElementById('actionUrge').value = '';
+                clearFieldError('emotionType');
+
+                // Update all visualizations
+                await App.loadEmotionHistory();
+                await App.updateDashboard();
+                await App.updateWeeklyComparison();
+                await App.renderEmotionHeatmap();
+            } catch (error) {
+                showNotification('Erro ao salvar: ' + error.message, 'error');
+            }
         }
 
-        // DBT Skills Modal
-        function openSkillModal(skill) {
+        async function changeMoodPeriod(days) {
+            App.currentPeriod = days;
+            await App.renderMoodChart(days);
+        }
+
+        async function savePractice() {
+            const type = document.getElementById('practiceType').value;
+            const duration = document.getElementById('practiceDuration').value;
+            const notes = document.getElementById('practiceNotes').value;
+
+            const practice = Schema.Practice.create(type, duration, notes);
+
+            const validation = Schema.Practice.validate(practice);
+            if (!validation.valid) {
+                if (!type) showFieldError('practiceType', validation.error);
+                if (!duration) showFieldError('practiceDuration', 'Insira a duração');
+                return;
+            }
+
+            try {
+                await App.store.save('practices', practice);
+                showNotification('Prática registrada com sucesso! 🎉', 'success');
+
+                // Clear form
+                document.getElementById('practiceType').value = '';
+                document.getElementById('practiceDuration').value = '';
+                document.getElementById('practiceNotes').value = '';
+                clearFieldError('practiceType');
+                clearFieldError('practiceDuration');
+
+                await App.loadPracticeHistory();
+                await App.updatePracticeStats();
+            } catch (error) {
+                showNotification('Erro ao salvar: ' + error.message, 'error');
+            }
+        }
+
+        async function saveSession() {
+            const date = document.getElementById('sessionDate').value;
+            const summary = document.getElementById('sessionSummary').value;
+            const homework = document.getElementById('sessionHomework').value;
+            const insights = document.getElementById('sessionInsights').value;
+
+            const session = Schema.Session.create(date, summary, homework, insights);
+
+            const validation = Schema.Session.validate(session);
+            if (!validation.valid) {
+                if (!date) showFieldError('sessionDate', validation.error);
+                if (!summary) showFieldError('sessionSummary', 'Adicione um resumo');
+                return;
+            }
+
+            try {
+                await App.store.save('sessions', session);
+                showNotification('Sessão salva com sucesso! 🎉', 'success');
+
+                // Clear form
+                document.getElementById('sessionDate').value = '';
+                document.getElementById('sessionSummary').value = '';
+                document.getElementById('sessionHomework').value = '';
+                document.getElementById('sessionInsights').value = '';
+                clearFieldError('sessionDate');
+                clearFieldError('sessionSummary');
+
+                await App.loadSessionHistory();
+                await App.updateStats();
+            } catch (error) {
+                showNotification('Erro ao salvar: ' + error.message, 'error');
+            }
+        }
+
+        // ============================================================================
+        // ROUTINE FUNCTIONS
+        // ============================================================================
+
+        const defaultRoutineActivities = [
+            { time: '08:00', title: 'Acordar e tomar café', description: 'Cuidar dos cachorros' },
+            { time: '08:30', title: 'Exercício/Caminhada', description: '30 minutos de atividade física' },
+            { time: '09:00', title: 'Trabalho/Estudo', description: 'Foco nas atividades principais' },
+            { time: '12:00', title: 'Almoço', description: 'Pausa para refeição' },
+            { time: '14:00', title: 'Trabalho/Estudo', description: 'Continuar projetos' },
+            { time: '16:00', title: 'Pausa/Cuidados', description: 'Momento de autocuidado' },
+            { time: '18:00', title: 'Atividade Livre', description: 'Hobby ou descanso' },
+            { time: '20:00', title: 'Jantar', description: 'Refeição noturna' },
+            { time: '22:00', title: 'Mindfulness', description: 'Prática antes de dormir' },
+            { time: '23:30', title: 'Dormir', description: 'Descanso necessário' }
+        ];
+
+        async function renderRoutine() {
+            const routineState = await App.loadRoutineState();
+            const container = document.getElementById('routineActivities');
+
+            container.innerHTML = defaultRoutineActivities.map((activity, index) => {
+                const isCompleted = routineState[index] || false;
+                return `
+                    <div class="dashboard-card" style="margin-bottom: 15px; cursor: pointer; transition: all 0.3s; ${isCompleted ? 'background: linear-gradient(135deg, rgba(130, 202, 157, 0.2) 0%, rgba(130, 202, 157, 0.1) 100%); border-left: 4px solid #82ca9d;' : ''}" onclick="toggleActivity(${index})">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="font-weight: bold; color: var(--primary); min-width: 60px;">${activity.time}</span>
+                                    <div>
+                                        <strong>${activity.title}</strong>
+                                        <p style="font-size: 13px; color: #666; margin-top: 3px;">${activity.description}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <span style="font-size: 24px;">${isCompleted ? '✅' : '⬜'}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            updateRoutineProgress(routineState);
+        }
+
+        async function toggleActivity(index) {
+            const routineState = await App.loadRoutineState();
+            routineState[index] = !routineState[index];
+            await App.saveRoutineState(routineState);
+            await renderRoutine();
+        }
+
+        function updateRoutineProgress(routineState) {
+            const completed = Object.values(routineState).filter(v => v).length;
+            const total = defaultRoutineActivities.length;
+            const percentage = Math.round((completed / total) * 100);
+
+            const progressBar = document.getElementById('routineProgress');
+            progressBar.style.width = percentage + '%';
+            progressBar.textContent = percentage + '%';
+        }
+
+        async function resetRoutine() {
+            if (confirm('Resetar todas as atividades do dia?')) {
+                await App.saveRoutineState({});
+                await renderRoutine();
+                showNotification('Rotina resetada!', 'success');
+            }
+        }
+
+        // ============================================================================
+        // SKILLS & ACCEPTS FUNCTIONS
+        // ============================================================================
+
+        function showSkillDetails(skillName) {
             const modal = document.getElementById('skillModal');
-            const title = document.getElementById('skillTitle');
-            const content = document.getElementById('skillContent');
-            
+            const title = document.getElementById('skillModalTitle');
+            const content = document.getElementById('skillModalContent');
+
             const skills = {
                 dearman: {
-                    title: 'DEAR MAN',
+                    title: 'DEAR MAN - Efetividade Interpessoal',
                     content: `
-                        <h3>Técnica para Efetividade Interpessoal</h3>
-                        <p><strong>D</strong>escrever - Descreva a situação objetivamente</p>
-                        <p><strong>E</strong>xpressar - Expresse seus sentimentos e opiniões</p>
-                        <p><strong>A</strong>firmar - Afirme o que você quer claramente</p>
-                        <p><strong>R</strong>eforçar - Reforce os benefícios</p>
-                        <hr>
-                        <p><strong>M</strong>indful - Mantenha-se focado no objetivo</p>
-                        <p><strong>A</strong>ppear confident - Apareça confiante</p>
-                        <p><strong>N</strong>egotiate - Negocie quando necessário</p>
-                        <div class="form-group" style="margin-top: 20px;">
-                            <label>Praticar DEAR MAN:</label>
-                            <textarea id="dearmanPractice" rows="4" placeholder="Descreva uma situação onde você usaria DEAR MAN..."></textarea>
-                            <button class="btn btn-success" onclick="saveDearMan()">Salvar Prática</button>
+                        <h3>Como usar DEAR MAN:</h3>
+                        <div style="margin-top: 15px;">
+                            <p style="margin-bottom: 10px;"><strong>D</strong>escrever - Descreva a situação de forma objetiva, sem julgamentos</p>
+                            <p style="margin-bottom: 10px;"><strong>E</strong>xpressar - Expresse seus sentimentos e opiniões claramente</p>
+                            <p style="margin-bottom: 10px;"><strong>A</strong>firmar - Afirme o que você quer ou precisa de forma específica</p>
+                            <p style="margin-bottom: 10px;"><strong>R</strong>eforçar - Reforce explicando os benefícios positivos</p>
+                            <hr style="margin: 20px 0;">
+                            <p style="margin-bottom: 10px;"><strong>M</strong>indful - Mantenha-se focado no seu objetivo</p>
+                            <p style="margin-bottom: 10px;"><strong>A</strong>ppear confident - Apareça confiante (postura, tom de voz)</p>
+                            <p style="margin-bottom: 10px;"><strong>N</strong>egotiate - Esteja disposto a negociar e fazer concessões</p>
+                        </div>
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(107, 91, 149, 0.1); border-radius: 10px;">
+                            <p style="font-size: 13px;"><strong>Exemplo:</strong> "Quando você chegou tarde sem avisar (D), eu fiquei preocupado (E). Eu gostaria que você me avisasse quando houver atrasos (A). Isso vai me deixar mais tranquilo e melhorar nossa relação (R)."</p>
+                        </div>
+                    `
+                },
+                tipp: {
+                    title: 'TIPP - Habilidades de Crise',
+                    content: `
+                        <h3>Mudar a química corporal rapidamente:</h3>
+                        <div style="margin-top: 15px;">
+                            <p style="margin-bottom: 10px;"><strong>T</strong>emperature - Mude a temperatura do corpo (água gelada no rosto, banho frio)</p>
+                            <p style="margin-bottom: 10px;"><strong>I</strong>ntense exercise - Exercício intenso (corrida, polichinelos, burpees)</p>
+                            <p style="margin-bottom: 10px;"><strong>P</strong>aced breathing - Respiração compassada (inspire 4s, segure 4s, expire 6s)</p>
+                            <p style="margin-bottom: 10px;"><strong>P</strong>aired muscle relaxation - Tensione e relaxe grupos musculares progressivamente</p>
+                        </div>
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(255, 107, 107, 0.1); border-radius: 10px;">
+                            <p style="font-size: 13px;"><strong>⚠️ Use TIPP quando:</strong> Emoções estão muito intensas (8-10) e você precisa reduzir rapidamente para pensar com clareza.</p>
+                        </div>
+                    `
+                },
+                stop: {
+                    title: 'STOP - Regulação Emocional',
+                    content: `
+                        <h3>Pausar antes de agir impulsivamente:</h3>
+                        <div style="margin-top: 15px;">
+                            <p style="margin-bottom: 10px;"><strong>S</strong>top - Pare! Não reaja imediatamente. Congele por um momento.</p>
+                            <p style="margin-bottom: 10px;"><strong>T</strong>ake a step back - Dê um passo atrás, tanto literal quanto mentalmente. Respire.</p>
+                            <p style="margin-bottom: 10px;"><strong>O</strong>bserve - Observe o que está acontecendo dentro e fora de você. Nomeie a emoção.</p>
+                            <p style="margin-bottom: 10px;"><strong>P</strong>roceed mindfully - Prossiga conscientemente. Pergunte: "Qual ação é efetiva agora?"</p>
+                        </div>
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(130, 202, 157, 0.1); border-radius: 10px;">
+                            <p style="font-size: 13px;"><strong>💡 Dica:</strong> STOP é especialmente útil quando você sente um impulso forte de fazer algo que pode ter consequências negativas.</p>
                         </div>
                     `
                 },
                 accepts: {
-                    title: 'ACCEPTS',
+                    title: 'ACCEPTS - Tolerância ao Mal-estar',
                     content: `
-                        <h3>Distrair-se de Emoções Intensas</h3>
-                        <p><strong>A</strong>ctivities - Atividades</p>
-                        <p><strong>C</strong>ontributing - Contribuir</p>
-                        <p><strong>C</strong>omparisons - Comparações</p>
-                        <p><strong>E</strong>motions - Emoções opostas</p>
-                        <p><strong>P</strong>ushing away - Afastar pensamentos</p>
-                        <p><strong>T</strong>houghts - Outros pensamentos</p>
-                        <p><strong>S</strong>ensations - Sensações físicas</p>
-                    `
-                },
-                tipp: {
-                    title: 'TIPP',
-                    content: `
-                        <h3>Mudar a Química Corporal Rapidamente</h3>
-                        <p><strong>T</strong>emperature - Temperatura (água gelada no rosto)</p>
-                        <p><strong>I</strong>ntense exercise - Exercício intenso</p>
-                        <p><strong>P</strong>aced breathing - Respiração compassada</p>
-                        <p><strong>P</strong>aired muscle relaxation - Relaxamento muscular progressivo</p>
-                    `
-                },
-                stop: {
-                    title: 'STOP',
-                    content: `
-                        <h3>Pausar Antes de Agir</h3>
-                        <p><strong>S</strong>top - Pare</p>
-                        <p><strong>T</strong>ake a step back - Dê um passo atrás</p>
-                        <p><strong>O</strong>bserve - Observe</p>
-                        <p><strong>P</strong>roceed mindfully - Prossiga conscientemente</p>
+                        <h3>Distrair-se de emoções dolorosas:</h3>
+                        <div style="margin-top: 15px;">
+                            <p style="margin-bottom: 10px;"><strong>A</strong>ctivities - Faça atividades que ocupem sua mente</p>
+                            <p style="margin-bottom: 10px;"><strong>C</strong>ontributing - Contribua, ajude outras pessoas</p>
+                            <p style="margin-bottom: 10px;"><strong>C</strong>omparisons - Compare com momentos piores ou com outras pessoas</p>
+                            <p style="margin-bottom: 10px;"><strong>E</strong>motions - Provoque emoções opostas (comédia se está triste)</p>
+                            <p style="margin-bottom: 10px;"><strong>P</strong>ushing away - Afaste temporariamente os pensamentos dolorosos</p>
+                            <p style="margin-bottom: 10px;"><strong>T</strong>houghts - Pense em outras coisas (contar, quebra-cabeça)</p>
+                            <p style="margin-bottom: 10px;"><strong>S</strong>ensations - Use sensações físicas intensas (gelo, música alta)</p>
+                        </div>
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(255, 180, 71, 0.1); border-radius: 10px;">
+                            <p style="font-size: 13px;"><strong>📌 Lembre-se:</strong> Preencha sua Carta ACCEPTS personalizada abaixo com estratégias que funcionam especificamente para você!</p>
+                        </div>
                     `
                 }
             };
-            
-            title.textContent = skills[skill].title;
-            content.innerHTML = skills[skill].content;
+
+            const skillData = skills[skillName];
+            title.textContent = skillData.title;
+            content.innerHTML = skillData.content;
             modal.classList.add('active');
         }
 
-        function closeModal() {
+        function closeSkillModal() {
             document.getElementById('skillModal').classList.remove('active');
         }
 
-        function saveDearMan() {
-            const practice = document.getElementById('dearmanPractice').value;
-            if (practice) {
-                let practices = JSON.parse(localStorage.getItem('dearmanPractices') || '[]');
-                practices.push({
-                    content: practice,
-                    timestamp: new Date().toISOString()
-                });
-                localStorage.setItem('dearmanPractices', JSON.stringify(practices));
-                addPoints(15);
-                alert('Prática de DEAR MAN salva!');
-                closeModal();
-            }
-        }
-
-        function saveAccepts() {
+        async function saveAcceptsCard() {
             const accepts = {
                 activities: document.getElementById('acceptsActivities').value,
                 contribute: document.getElementById('acceptsContribute').value,
                 compare: document.getElementById('acceptsCompare').value,
-                emotions: document.getElementById('acceptsEmotions').value
+                emotions: document.getElementById('acceptsEmotions').value,
+                pushing: document.getElementById('acceptsPushing').value,
+                thoughts: document.getElementById('acceptsThoughts').value,
+                sensations: document.getElementById('acceptsSensations').value
             };
-            localStorage.setItem('acceptsCard', JSON.stringify(accepts));
-            addPoints(20);
-            alert('Carta ACCEPTS salva com sucesso!');
+
+            await App.store.setMetadata('acceptsCard', accepts);
+            showNotification('Carta ACCEPTS salva com sucesso! 🎉', 'success');
         }
 
-        // Mindfulness timer
-        function setTimer(minutes) {
-            timerSeconds = minutes * 60;
-            updateTimerDisplay();
+        async function loadAcceptsCard() {
+            const accepts = await App.store.getMetadata('acceptsCard');
+            if (accepts) {
+                document.getElementById('acceptsActivities').value = accepts.activities || '';
+                document.getElementById('acceptsContribute').value = accepts.contribute || '';
+                document.getElementById('acceptsCompare').value = accepts.compare || '';
+                document.getElementById('acceptsEmotions').value = accepts.emotions || '';
+                document.getElementById('acceptsPushing').value = accepts.pushing || '';
+                document.getElementById('acceptsThoughts').value = accepts.thoughts || '';
+                document.getElementById('acceptsSensations').value = accepts.sensations || '';
+            }
         }
 
-        function updateTimerDisplay() {
-            const minutes = Math.floor(timerSeconds / 60);
-            const seconds = timerSeconds % 60;
-            document.getElementById('timerDisplay').textContent = 
-                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
+        // ============================================================================
+        // PDF EXPORT FUNCTION
+        // ============================================================================
 
-        function startTimer() {
-            if (timerInterval) return;
-            
-            timerInterval = setInterval(() => {
-                if (timerSeconds > 0) {
-                    timerSeconds--;
-                    updateTimerDisplay();
+        async function exportPDF() {
+            try {
+                showNotification('Gerando relatório PDF...', 'success');
+
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                // Get data
+                const moods = await App.store.getAll('moods');
+                const emotions = await App.store.getAll('emotions');
+                const practices = await App.store.getAll('practices');
+                const sessions = await App.store.getAll('sessions');
+
+                // Calculate date range (last 7 days)
+                const today = new Date();
+                const sevenDaysAgo = new Date(today);
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+                const weekMoods = moods.filter(m => new Date(m.date) >= sevenDaysAgo);
+                const weekEmotions = emotions.filter(e => new Date(e.date) >= sevenDaysAgo);
+                const weekPractices = practices.filter(p => new Date(p.date) >= sevenDaysAgo);
+
+                // Title
+                doc.setFontSize(20);
+                doc.text('Relatorio Terapeutico Semanal', 20, 20);
+
+                doc.setFontSize(12);
+                doc.text(`Periodo: ${sevenDaysAgo.toLocaleDateString('pt-BR')} a ${today.toLocaleDateString('pt-BR')}`, 20, 30);
+
+                // Mood summary
+                let y = 45;
+                doc.setFontSize(14);
+                doc.text('Resumo de Humor', 20, y);
+                y += 10;
+
+                if (weekMoods.length > 0) {
+                    const avgMood = (weekMoods.reduce((sum, m) => sum + m.value, 0) / weekMoods.length).toFixed(1);
+                    doc.setFontSize(11);
+                    doc.text(`- Total de registros: ${weekMoods.length}`, 25, y);
+                    y += 7;
+                    doc.text(`- Humor medio: ${avgMood}/5`, 25, y);
+                    y += 7;
                 } else {
-                    stopTimer();
-                    alert('Meditação concluída! 🧘');
-                    celebrate();
-                    addPoints(25);
+                    doc.setFontSize(11);
+                    doc.text('Nenhum registro de humor neste periodo', 25, y);
+                    y += 7;
                 }
-            }, 1000);
-        }
 
-        function stopTimer() {
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-            }
-        }
+                // Emotions summary
+                y += 5;
+                doc.setFontSize(14);
+                doc.text('Emocoes Registradas', 20, y);
+                y += 10;
 
-        function saveMindfulness() {
-            const practice = {
-                type: document.getElementById('mindfulnessType').value,
-                duration: document.getElementById('mindfulnessDuration').value,
-                notes: document.getElementById('mindfulnessNotes').value,
-                timestamp: new Date().toISOString()
-            };
-            
-            if (!practice.duration) {
-                alert('Por favor, insira a duração da prática!');
-                return;
-            }
-            
-            let practices = JSON.parse(localStorage.getItem('mindfulnessPractices') || '[]');
-            practices.push(practice);
-            localStorage.setItem('mindfulnessPractices', JSON.stringify(practices));
-            localStorage.setItem('lastMindfulness', new Date().toLocaleDateString('pt-BR'));
-            
-            // Clear form
-            document.getElementById('mindfulnessDuration').value = '';
-            document.getElementById('mindfulnessNotes').value = '';
-            
-            loadMindfulnessHistory();
-            addPoints(20);
-            alert('Prática registrada com sucesso!');
-        }
+                if (weekEmotions.length > 0) {
+                    const emotionCounts = {};
+                    weekEmotions.forEach(e => {
+                        emotionCounts[e.type] = (emotionCounts[e.type] || 0) + 1;
+                    });
 
-        function loadMindfulnessHistory() {
-            const practices = JSON.parse(localStorage.getItem('mindfulnessPractices') || '[]');
-            const historyDiv = document.getElementById('mindfulnessHistory');
-            
-            if (practices.length === 0) {
-                historyDiv.innerHTML = '<p>Nenhuma prática registrada ainda.</p>';
-                return;
-            }
-            
-            historyDiv.innerHTML = practices.slice(-5).reverse().map(practice => `
-                <div class="note-card">
-                    <div class="note-date">${new Date(practice.timestamp).toLocaleString('pt-BR')}</div>
-                    <strong>${practice.type} - ${practice.duration} minutos</strong>
-                    ${practice.notes ? `<p>${practice.notes}</p>` : ''}
-                </div>
-            `).join('');
-        }
+                    doc.setFontSize(11);
+                    doc.text(`- Total de registros: ${weekEmotions.length}`, 25, y);
+                    y += 7;
 
-        // Session notes
-        function saveSession() {
-            const session = {
-                date: document.getElementById('sessionDate').value,
-                summary: document.getElementById('sessionSummary').value,
-                homework: document.getElementById('sessionHomework').value,
-                insights: document.getElementById('sessionInsights').value,
-                timestamp: new Date().toISOString()
-            };
-            
-            if (!session.date || !session.summary) {
-                alert('Por favor, preencha a data e o resumo da sessão!');
-                return;
-            }
-            
-            let sessions = JSON.parse(localStorage.getItem('sessions') || '[]');
-            sessions.push(session);
-            localStorage.setItem('sessions', JSON.stringify(sessions));
-            
-            // Clear form
-            document.getElementById('sessionDate').value = '';
-            document.getElementById('sessionSummary').value = '';
-            document.getElementById('sessionHomework').value = '';
-            document.getElementById('sessionInsights').value = '';
-            
-            loadSessionHistory();
-            addPoints(30);
-            alert('Sessão salva com sucesso!');
-        }
+                    const topEmotions = Object.entries(emotionCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+                    doc.text('- Emocoes mais frequentes:', 25, y);
+                    y += 7;
 
-        function loadSessionHistory() {
-            const sessions = JSON.parse(localStorage.getItem('sessions') || '[]');
-            const historyDiv = document.getElementById('sessionHistory');
-            
-            if (sessions.length === 0) {
-                historyDiv.innerHTML = '<p>Nenhuma sessão registrada ainda.</p>';
-                return;
-            }
-            
-            historyDiv.innerHTML = sessions.slice(-5).reverse().map(session => `
-                <div class="note-card">
-                    <div class="note-date">Sessão de ${new Date(session.date).toLocaleDateString('pt-BR')}</div>
-                    <p><strong>Resumo:</strong> ${session.summary}</p>
-                    ${session.homework ? `<p><strong>Tarefas:</strong> ${session.homework}</p>` : ''}
-                    ${session.insights ? `<p><strong>Insights:</strong> ${session.insights}</p>` : ''}
-                </div>
-            `).join('');
-        }
-
-        // Rewards system
-        function addPoints(amount) {
-            points += amount;
-            localStorage.setItem('rewardPoints', points.toString());
-            updatePointsDisplay();
-        }
-
-        function updatePointsDisplay() {
-            document.getElementById('rewardPoints').textContent = points;
-        }
-
-        function addReward() {
-            const name = document.getElementById('rewardName').value;
-            const cost = document.getElementById('rewardCost').value;
-            
-            if (!name || !cost) {
-                alert('Por favor, preencha todos os campos!');
-                return;
-            }
-            
-            let rewards = JSON.parse(localStorage.getItem('rewards') || '[]');
-            rewards.push({
-                id: Date.now(),
-                name: name,
-                cost: parseInt(cost),
-                claimed: false
-            });
-            localStorage.setItem('rewards', JSON.stringify(rewards));
-            
-            document.getElementById('rewardName').value = '';
-            document.getElementById('rewardCost').value = '';
-            
-            loadRewards();
-            alert('Recompensa adicionada!');
-        }
-
-        function loadRewards() {
-            const rewards = JSON.parse(localStorage.getItem('rewards') || '[]');
-            const container = document.getElementById('rewardsContainer');
-            
-            if (rewards.length === 0) {
-                container.innerHTML = '<p>Nenhuma recompensa cadastrada ainda.</p>';
-                return;
-            }
-            
-            container.innerHTML = rewards.map(reward => `
-                <div class="reward-item ${reward.claimed ? 'claimed' : ''}" onclick="claimReward(${reward.id})">
-                    <h4>${reward.name}</h4>
-                    <p>${reward.cost} pontos</p>
-                    ${reward.claimed ? '<p>✓ Resgatado</p>' : ''}
-                </div>
-            `).join('');
-        }
-
-        function claimReward(id) {
-            let rewards = JSON.parse(localStorage.getItem('rewards') || '[]');
-            const reward = rewards.find(r => r.id === id);
-            
-            if (reward && !reward.claimed) {
-                if (points >= reward.cost) {
-                    points -= reward.cost;
-                    reward.claimed = true;
-                    localStorage.setItem('rewards', JSON.stringify(rewards));
-                    localStorage.setItem('rewardPoints', points.toString());
-                    updatePointsDisplay();
-                    loadRewards();
-                    celebrate();
-                    alert(`Recompensa "${reward.name}" resgatada!`);
+                    topEmotions.forEach(([emotion, count]) => {
+                        doc.text(`  ${emotion}: ${count}x`, 30, y);
+                        y += 6;
+                    });
                 } else {
-                    alert('Pontos insuficientes!');
+                    doc.setFontSize(11);
+                    doc.text('Nenhuma emocao registrada neste periodo', 25, y);
+                    y += 7;
                 }
-            }
-        }
 
-        function saveBehaviors() {
-            const behaviors = {
-                liked: document.getElementById('likedBehaviors').value,
-                disliked: document.getElementById('dislikedBehaviors').value
-            };
-            localStorage.setItem('behaviors', JSON.stringify(behaviors));
-            addPoints(10);
-            alert('Comportamentos salvos!');
-        }
+                // Practices summary
+                y += 5;
+                doc.setFontSize(14);
+                doc.text('Praticas de Mindfulness', 20, y);
+                y += 10;
 
-        // Quick add button
-        function quickAdd() {
-            const choice = prompt('O que você quer registrar?\n1 - Humor\n2 - Emoção\n3 - Mindfulness\n4 - Anotação rápida');
-            
-            switch(choice) {
-                case '1':
-                    switchTab('dashboard');
-                    break;
-                case '2':
-                    switchTab('emotions');
-                    break;
-                case '3':
-                    switchTab('mindfulness');
-                    break;
-                case '4':
-                    const note = prompt('Digite sua anotação:');
-                    if (note) {
-                        let quickNotes = JSON.parse(localStorage.getItem('quickNotes') || '[]');
-                        quickNotes.push({
-                            content: note,
-                            timestamp: new Date().toISOString()
-                        });
-                        localStorage.setItem('quickNotes', JSON.stringify(quickNotes));
-                        alert('Anotação salva!');
+                if (weekPractices.length > 0) {
+                    const totalMinutes = weekPractices.reduce((sum, p) => sum + parseInt(p.duration), 0);
+                    doc.setFontSize(11);
+                    doc.text(`- Total de praticas: ${weekPractices.length}`, 25, y);
+                    y += 7;
+                    doc.text(`- Tempo total: ${totalMinutes} minutos (${(totalMinutes / 60).toFixed(1)}h)`, 25, y);
+                    y += 7;
+                } else {
+                    doc.setFontSize(11);
+                    doc.text('Nenhuma pratica registrada neste periodo', 25, y);
+                    y += 7;
+                }
+
+                // Sessions
+                if (sessions.length > 0) {
+                    y += 5;
+                    doc.setFontSize(14);
+                    doc.text('Ultima Sessao Terapeutica', 20, y);
+                    y += 10;
+
+                    const lastSession = sessions[sessions.length - 1];
+                    doc.setFontSize(11);
+                    doc.text(`Data: ${new Date(lastSession.date).toLocaleDateString('pt-BR')}`, 25, y);
+                    y += 7;
+
+                    if (lastSession.summary) {
+                        doc.text('Resumo:', 25, y);
+                        y += 7;
+                        const summaryLines = doc.splitTextToSize(lastSession.summary, 160);
+                        doc.text(summaryLines, 30, y);
+                        y += (summaryLines.length * 6);
                     }
-                    break;
+                }
+
+                // Footer
+                doc.setFontSize(9);
+                doc.text(`Gerado em ${new Date().toLocaleString('pt-BR')}`, 20, 280);
+
+                // Save PDF
+                doc.save(`relatorio-terapeutico-${today.toISOString().split('T')[0]}.pdf`);
+
+                showNotification('Relatório PDF gerado com sucesso!', 'success');
+            } catch (error) {
+                console.error('Erro ao gerar PDF:', error);
+                showNotification('Erro ao gerar PDF: ' + error.message, 'error');
             }
         }
 
-        // Celebration animation
-        function celebrate() {
-            const celebration = document.createElement('div');
-            celebration.className = 'celebration';
-            celebration.textContent = '🎉';
-            document.body.appendChild(celebration);
-            
+        async function exportBackup() {
+            try {
+                const data = await App.store.exportAll();
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `therapy-backup-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                await App.store.setMetadata('lastBackup', new Date().toISOString());
+                await App.updateBackupBadge();
+
+                showNotification('Backup baixado com sucesso!', 'success');
+            } catch (error) {
+                showNotification('Erro ao exportar: ' + error.message, 'error');
+            }
+        }
+
+        async function restoreBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+
+                if (!confirm('⚠️ Isso irá substituir todos os dados atuais. Continuar?')) {
+                    return;
+                }
+
+                await App.store.importAll(data);
+                showNotification('Backup restaurado com sucesso!', 'success');
+
+                // Reload all data
+                await App.updateDashboard();
+                await App.loadEmotionHistory();
+                await App.updateStats();
+                await App.updateBackupBadge();
+            } catch (error) {
+                showNotification('Erro ao restaurar: ' + error.message, 'error');
+            }
+        }
+
+        function showBackupModal() {
+            if (confirm('Deseja fazer backup agora?')) {
+                exportBackup();
+            }
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
             setTimeout(() => {
-                celebration.remove();
-            }, 1000);
+                notification.remove();
+            }, 3000);
         }
 
-        // Load all saved data
-        function loadAllData() {
-            // Load last activities
-            document.getElementById('lastMindfulness').textContent = 
-                localStorage.getItem('lastMindfulness') || 'Não registrado';
-            
-            // Load ACCEPTS card
-            const accepts = JSON.parse(localStorage.getItem('acceptsCard') || '{}');
-            if (accepts.activities) document.getElementById('acceptsActivities').value = accepts.activities;
-            if (accepts.contribute) document.getElementById('acceptsContribute').value = accepts.contribute;
-            if (accepts.compare) document.getElementById('acceptsCompare').value = accepts.compare;
-            if (accepts.emotions) document.getElementById('acceptsEmotions').value = accepts.emotions;
-            
-            // Load behaviors
-            const behaviors = JSON.parse(localStorage.getItem('behaviors') || '{}');
-            if (behaviors.liked) document.getElementById('likedBehaviors').value = behaviors.liked;
-            if (behaviors.disliked) document.getElementById('dislikedBehaviors').value = behaviors.disliked;
+        function showFieldError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const error = document.getElementById(fieldId + 'Error');
+
+            field.classList.add('error');
+            if (error) {
+                error.textContent = message;
+                error.classList.add('visible');
+            }
         }
 
-        // Export data function
-        function exportData() {
-            const data = {
-                moods: localStorage.getItem('moods'),
-                emotions: localStorage.getItem('emotions'),
-                mindfulness: localStorage.getItem('mindfulnessPractices'),
-                sessions: localStorage.getItem('sessions'),
-                accepts: localStorage.getItem('acceptsCard'),
-                behaviors: localStorage.getItem('behaviors'),
-                rewards: localStorage.getItem('rewards'),
-                points: localStorage.getItem('rewardPoints'),
-                exportDate: new Date().toISOString()
-            };
-            
-            const dataStr = JSON.stringify(data, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            
-            const exportFileDefaultName = `therapeutic-data-${new Date().toISOString().split('T')[0]}.json`;
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
+        function clearFieldError(fieldId) {
+            const field = document.getElementById(fieldId);
+            const error = document.getElementById(fieldId + 'Error');
+
+            field.classList.remove('error');
+            if (error) {
+                error.classList.remove('visible');
+            }
         }
+
+        function formatDateTime(isoString) {
+            return new Date(isoString).toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        // Update intensity display
+        document.addEventListener('DOMContentLoaded', () => {
+            const intensitySlider = document.getElementById('emotionIntensity');
+            if (intensitySlider) {
+                intensitySlider.addEventListener('input', function() {
+                    document.getElementById('intensityValue').textContent = this.value;
+                });
+            }
+        });
+
+        // Initialize app on load
+        window.onload = () => {
+            App.init();
+        };
     </script>
 </body>
 </html>

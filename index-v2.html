@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Espaço Terapêutico - DBT v2</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -339,6 +340,23 @@
             background: var(--danger);
         }
 
+        .period-btn {
+            padding: 8px 16px;
+            margin-right: 5px;
+            background: rgba(136, 176, 211, 0.2);
+            border: 2px solid var(--secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .period-btn:hover {
+            background: var(--secondary);
+            color: white;
+        }
+
         /* Modal */
         .modal {
             display: none;
@@ -532,6 +550,35 @@
                         <ul id="todaySummary" style="margin-left: 20px; margin-top: 10px;">
                             <li>Carregando...</li>
                         </ul>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>Comparação Semanal</h3>
+                        <div id="weeklyComparison">
+                            <p><strong>Semana atual vs anterior:</strong></p>
+                            <div id="comparisonStats" style="margin-top: 10px;">
+                                Carregando...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                        <h3>Tendência de Humor</h3>
+                        <div>
+                            <button class="period-btn" onclick="changeMoodPeriod(7)">7 dias</button>
+                            <button class="period-btn" onclick="changeMoodPeriod(14)">14 dias</button>
+                            <button class="period-btn" onclick="changeMoodPeriod(30)">30 dias</button>
+                        </div>
+                    </div>
+                    <canvas id="moodChart" style="max-height: 300px;"></canvas>
+                </div>
+
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h3>Emoções da Semana (Heatmap)</h3>
+                    <div id="emotionHeatmap" style="margin-top: 15px;">
+                        Carregando...
                     </div>
                 </div>
             </div>
@@ -1011,6 +1058,11 @@
                 await this.updateBackupBadge();
                 await this.updateStats();
 
+                // Render charts and visualizations
+                await this.renderMoodChart(this.currentPeriod);
+                await this.updateWeeklyComparison();
+                await this.renderEmotionHeatmap();
+
                 document.getElementById('dataStatus').textContent =
                     this.store.ready ? '✅ Persistência ativa' : '⚠️ Apenas localStorage';
 
@@ -1092,6 +1144,226 @@
                             '⚠️ Apenas localStorage (IndexedDB indisponível)'}
                     </p>
                 `;
+            },
+
+            moodChart: null,
+            currentPeriod: 7,
+
+            async renderMoodChart(days = 7) {
+                const moods = await this.store.getAll('moods');
+
+                // Get data for the last N days
+                const endDate = new Date();
+                const startDate = new Date();
+                startDate.setDate(startDate.getDate() - days);
+
+                // Create labels for all days in range
+                const labels = [];
+                const dataPoints = [];
+
+                for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                    const dateStr = d.toISOString().split('T')[0];
+                    labels.push(dateStr);
+
+                    // Get average mood for this day
+                    const dayMoods = moods.filter(m => m.date === dateStr);
+                    if (dayMoods.length > 0) {
+                        const avg = dayMoods.reduce((sum, m) => sum + m.value, 0) / dayMoods.length;
+                        dataPoints.push(avg.toFixed(1));
+                    } else {
+                        dataPoints.push(null);
+                    }
+                }
+
+                // Format labels for display (show day/month)
+                const formattedLabels = labels.map(dateStr => {
+                    const date = new Date(dateStr);
+                    return `${date.getDate()}/${date.getMonth() + 1}`;
+                });
+
+                const ctx = document.getElementById('moodChart');
+                if (!ctx) return;
+
+                // Destroy existing chart
+                if (this.moodChart) {
+                    this.moodChart.destroy();
+                }
+
+                this.moodChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: formattedLabels,
+                        datasets: [{
+                            label: 'Humor Médio',
+                            data: dataPoints,
+                            borderColor: '#6b5b95',
+                            backgroundColor: 'rgba(107, 91, 149, 0.1)',
+                            tension: 0.3,
+                            fill: true,
+                            spanGaps: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const emojis = ['', '😔', '😕', '😐', '🙂', '😊'];
+                                        const value = context.parsed.y;
+                                        const rounded = Math.round(value);
+                                        return `${value} ${emojis[rounded] || ''}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                min: 0,
+                                max: 5,
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: function(value) {
+                                        const emojis = ['', '😔', '😕', '😐', '🙂', '😊'];
+                                        return emojis[value] || value;
+                                    }
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        }
+                    }
+                });
+            },
+
+            async updateWeeklyComparison() {
+                const moods = await this.store.getAll('moods');
+                const emotions = await this.store.getAll('emotions');
+
+                const today = new Date();
+
+                // Current week (last 7 days)
+                const weekStart = new Date(today);
+                weekStart.setDate(weekStart.getDate() - 7);
+
+                // Previous week (8-14 days ago)
+                const prevWeekStart = new Date(today);
+                prevWeekStart.setDate(prevWeekStart.getDate() - 14);
+                const prevWeekEnd = new Date(today);
+                prevWeekEnd.setDate(prevWeekEnd.getDate() - 8);
+
+                // Calculate current week stats
+                const currentWeekMoods = moods.filter(m => {
+                    const moodDate = new Date(m.date);
+                    return moodDate >= weekStart && moodDate <= today;
+                });
+
+                const currentWeekEmotions = emotions.filter(e => {
+                    const emotionDate = new Date(e.date);
+                    return emotionDate >= weekStart && emotionDate <= today;
+                });
+
+                // Calculate previous week stats
+                const prevWeekMoods = moods.filter(m => {
+                    const moodDate = new Date(m.date);
+                    return moodDate >= prevWeekStart && moodDate <= prevWeekEnd;
+                });
+
+                const prevWeekEmotions = emotions.filter(e => {
+                    const emotionDate = new Date(e.date);
+                    return emotionDate >= prevWeekStart && emotionDate <= prevWeekEnd;
+                });
+
+                // Calculate averages
+                const currentAvg = currentWeekMoods.length > 0
+                    ? (currentWeekMoods.reduce((sum, m) => sum + m.value, 0) / currentWeekMoods.length).toFixed(1)
+                    : 'N/A';
+
+                const prevAvg = prevWeekMoods.length > 0
+                    ? (prevWeekMoods.reduce((sum, m) => sum + m.value, 0) / prevWeekMoods.length).toFixed(1)
+                    : 'N/A';
+
+                const moodDelta = currentAvg !== 'N/A' && prevAvg !== 'N/A'
+                    ? (currentAvg - prevAvg).toFixed(1)
+                    : 'N/A';
+
+                const moodDeltaSymbol = moodDelta > 0 ? '📈' : moodDelta < 0 ? '📉' : '➡️';
+
+                const comparisonDiv = document.getElementById('comparisonStats');
+                comparisonDiv.innerHTML = `
+                    <p><strong>Humor médio:</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>Semana atual: ${currentAvg} ${moodDeltaSymbol}</li>
+                        <li>Semana anterior: ${prevAvg}</li>
+                        ${moodDelta !== 'N/A' ? `<li>Diferença: ${moodDelta > 0 ? '+' : ''}${moodDelta}</li>` : ''}
+                    </ul>
+                    <p style="margin-top: 10px;"><strong>Registros:</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>Emoções esta semana: ${currentWeekEmotions.length}</li>
+                        <li>Emoções semana anterior: ${prevWeekEmotions.length}</li>
+                    </ul>
+                `;
+            },
+
+            async renderEmotionHeatmap() {
+                const emotions = await this.store.getAll('emotions');
+
+                // Get last 7 days
+                const today = new Date();
+                const sevenDaysAgo = new Date(today);
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+                // Count emotions by type for each day
+                const emotionTypes = ['alegria', 'tristeza', 'raiva', 'medo', 'ansiedade', 'calma', 'frustração', 'esperança', 'vergonha'];
+                const heatmapData = {};
+
+                for (let d = new Date(sevenDaysAgo); d <= today; d.setDate(d.getDate() + 1)) {
+                    const dateStr = d.toISOString().split('T')[0];
+                    heatmapData[dateStr] = {};
+
+                    emotionTypes.forEach(type => {
+                        const count = emotions.filter(e => e.date === dateStr && e.type === type).length;
+                        heatmapData[dateStr][type] = count;
+                    });
+                }
+
+                // Render as simple grid
+                const heatmapDiv = document.getElementById('emotionHeatmap');
+                let html = '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse;">';
+
+                // Header row (days)
+                html += '<tr><th style="padding: 8px; border: 1px solid #ddd;">Emoção</th>';
+                Object.keys(heatmapData).forEach(dateStr => {
+                    const date = new Date(dateStr);
+                    html += `<th style="padding: 8px; border: 1px solid #ddd; font-size: 12px;">${date.getDate()}/${date.getMonth() + 1}</th>`;
+                });
+                html += '</tr>';
+
+                // Data rows (emotions)
+                emotionTypes.forEach(type => {
+                    html += `<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: 500;">${type}</td>`;
+                    Object.values(heatmapData).forEach(dayData => {
+                        const count = dayData[type];
+                        const intensity = count > 0 ? Math.min(count * 30, 100) : 0;
+                        const bgColor = count > 0 ? `rgba(107, 91, 149, ${intensity/100})` : '#f5f5f5';
+                        html += `<td style="padding: 8px; border: 1px solid #ddd; text-align: center; background: ${bgColor};">${count || ''}</td>`;
+                    });
+                    html += '</tr>';
+                });
+
+                html += '</table></div>';
+                html += '<p style="margin-top: 10px; font-size: 12px; color: #666;">Cor mais escura = maior frequência</p>';
+
+                heatmapDiv.innerHTML = html;
             }
         };
 
@@ -1155,7 +1427,10 @@
                 document.getElementById('moodNote').value = '';
                 App.currentMood = null;
 
+                // Update all visualizations
                 await App.updateDashboard();
+                await App.renderMoodChart(App.currentPeriod);
+                await App.updateWeeklyComparison();
             } catch (error) {
                 showNotification('Erro ao salvar: ' + error.message, 'error');
             }
@@ -1193,11 +1468,19 @@
                 document.getElementById('actionUrge').value = '';
                 clearFieldError('emotionType');
 
+                // Update all visualizations
                 await App.loadEmotionHistory();
                 await App.updateDashboard();
+                await App.updateWeeklyComparison();
+                await App.renderEmotionHeatmap();
             } catch (error) {
                 showNotification('Erro ao salvar: ' + error.message, 'error');
             }
+        }
+
+        async function changeMoodPeriod(days) {
+            App.currentPeriod = days;
+            await App.renderMoodChart(days);
         }
 
         async function exportBackup() {

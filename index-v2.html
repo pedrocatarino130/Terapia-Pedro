@@ -517,6 +517,12 @@
             <button class="nav-tab" data-tab="emotions" onclick="switchTab('emotions', this)">
                 <span>💭</span> Emoções
             </button>
+            <button class="nav-tab" data-tab="mindfulness" onclick="switchTab('mindfulness', this)">
+                <span>🧘</span> Mindfulness
+            </button>
+            <button class="nav-tab" data-tab="sessions" onclick="switchTab('sessions', this)">
+                <span>📝</span> Sessões
+            </button>
             <button class="nav-tab" data-tab="settings" onclick="switchTab('settings', this)">
                 <span>⚙️</span> Configurações
             </button>
@@ -634,6 +640,86 @@
 
                 <h3 style="margin-top: 30px;">Histórico de Emoções (últimas 10)</h3>
                 <div id="emotionHistory"></div>
+            </div>
+
+            <!-- Mindfulness Tab -->
+            <div id="mindfulness" class="tab-content">
+                <h2>Práticas de Mindfulness</h2>
+
+                <div class="dashboard-card">
+                    <h3>Registrar Nova Prática</h3>
+
+                    <div class="form-group">
+                        <label>Tipo de Prática *</label>
+                        <select id="practiceType">
+                            <option value="">Selecione...</option>
+                            <option value="formal">Meditação Formal (sentado)</option>
+                            <option value="informal">Mindfulness Informal</option>
+                            <option value="breathing">Exercício de Respiração</option>
+                            <option value="body-scan">Escaneamento Corporal</option>
+                            <option value="walking">Caminhada Consciente</option>
+                            <option value="eating">Alimentação Consciente</option>
+                        </select>
+                        <div class="field-error" id="practiceTypeError">Selecione um tipo de prática</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Duração (minutos) *</label>
+                        <input type="number" id="practiceDuration" min="1" max="120" placeholder="Ex: 10">
+                        <div class="field-error" id="practiceDurationError">Insira a duração</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Como foi a experiência?</label>
+                        <textarea id="practiceNotes" rows="3" placeholder="Descreva sua prática... (opcional)"></textarea>
+                    </div>
+
+                    <button class="btn btn-success" onclick="savePractice()">Registrar Prática</button>
+                </div>
+
+                <h3 style="margin-top: 30px;">Histórico de Práticas</h3>
+                <div id="practiceHistory">Carregando...</div>
+
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h3>Estatísticas de Mindfulness</h3>
+                    <div id="practiceStats">Carregando...</div>
+                </div>
+            </div>
+
+            <!-- Sessions Tab -->
+            <div id="sessions" class="tab-content">
+                <h2>Anotações de Sessões Terapêuticas</h2>
+
+                <div class="dashboard-card">
+                    <h3>Registrar Nova Sessão</h3>
+
+                    <div class="form-group">
+                        <label>Data da Sessão *</label>
+                        <input type="date" id="sessionDate">
+                        <div class="field-error" id="sessionDateError">Selecione uma data</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Resumo da Sessão *</label>
+                        <textarea id="sessionSummary" rows="4" placeholder="O que foi discutido na sessão..."></textarea>
+                        <div class="field-error" id="sessionSummaryError">Adicione um resumo</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tarefas para Casa</label>
+                        <textarea id="sessionHomework" rows="3" placeholder="- Tarefa 1&#10;- Tarefa 2&#10;- Tarefa 3 (opcional)"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Insights Importantes</label>
+                        <textarea id="sessionInsights" rows="3" placeholder="Percepções e aprendizados... (opcional)"></textarea>
+                    </div>
+
+                    <button class="btn btn-success" onclick="saveSession()">Salvar Sessão</button>
+                </div>
+
+                <h3 style="margin-top: 30px;">Sessões Anteriores</h3>
+                <div id="sessionHistory">Carregando...</div>
             </div>
 
             <!-- Settings Tab -->
@@ -1063,6 +1149,11 @@
                 await this.updateWeeklyComparison();
                 await this.renderEmotionHeatmap();
 
+                // Load practice and session data
+                await this.loadPracticeHistory();
+                await this.updatePracticeStats();
+                await this.loadSessionHistory();
+
                 document.getElementById('dataStatus').textContent =
                     this.store.ready ? '✅ Persistência ativa' : '⚠️ Apenas localStorage';
 
@@ -1364,6 +1455,82 @@
                 html += '<p style="margin-top: 10px; font-size: 12px; color: #666;">Cor mais escura = maior frequência</p>';
 
                 heatmapDiv.innerHTML = html;
+            },
+
+            async loadPracticeHistory() {
+                const practices = await this.store.getAll('practices');
+                const historyDiv = document.getElementById('practiceHistory');
+
+                if (practices.length === 0) {
+                    historyDiv.innerHTML = '<p>Nenhuma prática registrada ainda.</p>';
+                    return;
+                }
+
+                const recent = practices.slice(-10).reverse();
+                historyDiv.innerHTML = recent.map(p => `
+                    <div class="emotion-log" style="border-left-color: #82ca9d;">
+                        <div class="note-date">${formatDateTime(p.timestamp)}</div>
+                        <strong>${p.type} - ${p.duration} minutos</strong>
+                        ${p.notes ? `<p>${p.notes}</p>` : ''}
+                    </div>
+                `).join('');
+            },
+
+            async updatePracticeStats() {
+                const practices = await this.store.getAll('practices');
+                const statsDiv = document.getElementById('practiceStats');
+
+                if (practices.length === 0) {
+                    statsDiv.innerHTML = '<p>Sem práticas registradas.</p>';
+                    return;
+                }
+
+                // Calculate stats
+                const totalMinutes = practices.reduce((sum, p) => sum + parseInt(p.duration), 0);
+                const avgDuration = (totalMinutes / practices.length).toFixed(1);
+
+                // This month
+                const today = new Date();
+                const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                const thisMonthPractices = practices.filter(p => new Date(p.date) >= firstDayOfMonth);
+
+                const typeCount = {};
+                practices.forEach(p => {
+                    typeCount[p.type] = (typeCount[p.type] || 0) + 1;
+                });
+
+                const mostCommon = Object.entries(typeCount).sort((a, b) => b[1] - a[1])[0];
+
+                statsDiv.innerHTML = `
+                    <p><strong>Estatísticas gerais:</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Total de práticas: ${practices.length}</li>
+                        <li>Tempo total: ${totalMinutes} minutos (${(totalMinutes / 60).toFixed(1)}h)</li>
+                        <li>Duração média: ${avgDuration} minutos</li>
+                        <li>Práticas este mês: ${thisMonthPractices.length}</li>
+                        ${mostCommon ? `<li>Tipo mais praticado: ${mostCommon[0]} (${mostCommon[1]}x)</li>` : ''}
+                    </ul>
+                `;
+            },
+
+            async loadSessionHistory() {
+                const sessions = await this.store.getAll('sessions');
+                const historyDiv = document.getElementById('sessionHistory');
+
+                if (sessions.length === 0) {
+                    historyDiv.innerHTML = '<p>Nenhuma sessão registrada ainda.</p>';
+                    return;
+                }
+
+                const recent = sessions.slice(-5).reverse();
+                historyDiv.innerHTML = recent.map(s => `
+                    <div class="note-card">
+                        <div class="note-date">Sessão de ${new Date(s.date).toLocaleDateString('pt-BR')}</div>
+                        <p><strong>Resumo:</strong> ${s.summary}</p>
+                        ${s.homework ? `<p><strong>Tarefas:</strong> ${s.homework}</p>` : ''}
+                        ${s.insights ? `<p><strong>Insights:</strong> ${s.insights}</p>` : ''}
+                    </div>
+                `).join('');
             }
         };
 
@@ -1481,6 +1648,72 @@
         async function changeMoodPeriod(days) {
             App.currentPeriod = days;
             await App.renderMoodChart(days);
+        }
+
+        async function savePractice() {
+            const type = document.getElementById('practiceType').value;
+            const duration = document.getElementById('practiceDuration').value;
+            const notes = document.getElementById('practiceNotes').value;
+
+            const practice = Schema.Practice.create(type, duration, notes);
+
+            const validation = Schema.Practice.validate(practice);
+            if (!validation.valid) {
+                if (!type) showFieldError('practiceType', validation.error);
+                if (!duration) showFieldError('practiceDuration', 'Insira a duração');
+                return;
+            }
+
+            try {
+                await App.store.save('practices', practice);
+                showNotification('Prática registrada com sucesso! 🎉', 'success');
+
+                // Clear form
+                document.getElementById('practiceType').value = '';
+                document.getElementById('practiceDuration').value = '';
+                document.getElementById('practiceNotes').value = '';
+                clearFieldError('practiceType');
+                clearFieldError('practiceDuration');
+
+                await App.loadPracticeHistory();
+                await App.updatePracticeStats();
+            } catch (error) {
+                showNotification('Erro ao salvar: ' + error.message, 'error');
+            }
+        }
+
+        async function saveSession() {
+            const date = document.getElementById('sessionDate').value;
+            const summary = document.getElementById('sessionSummary').value;
+            const homework = document.getElementById('sessionHomework').value;
+            const insights = document.getElementById('sessionInsights').value;
+
+            const session = Schema.Session.create(date, summary, homework, insights);
+
+            const validation = Schema.Session.validate(session);
+            if (!validation.valid) {
+                if (!date) showFieldError('sessionDate', validation.error);
+                if (!summary) showFieldError('sessionSummary', 'Adicione um resumo');
+                return;
+            }
+
+            try {
+                await App.store.save('sessions', session);
+                showNotification('Sessão salva com sucesso! 🎉', 'success');
+
+                // Clear form
+                document.getElementById('sessionDate').value = '';
+                document.getElementById('sessionSummary').value = '';
+                document.getElementById('sessionHomework').value = '';
+                document.getElementById('sessionInsights').value = '';
+                clearFieldError('sessionDate');
+                clearFieldError('sessionSummary');
+
+                await App.loadSessionHistory();
+                await App.updateStats();
+            } catch (error) {
+                showNotification('Erro ao salvar: ' + error.message, 'error');
+            }
         }
 
         async function exportBackup() {

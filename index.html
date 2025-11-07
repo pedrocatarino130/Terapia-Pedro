@@ -488,6 +488,56 @@
                 opacity: 1;
             }
         }
+
+        /* Routine Config Styles */
+        .activity-config-item {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .dark-mode .activity-config-item {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .activity-config-item input[type="time"],
+        .activity-config-item input[type="text"] {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .activity-config-controls {
+            display: flex;
+            gap: 5px;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+
+        .activity-config-controls button {
+            padding: 6px 12px;
+            font-size: 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .activity-config-controls .btn-move {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .activity-config-controls .btn-remove {
+            background: var(--danger);
+            color: white;
+        }
+
+        .activity-config-controls button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -539,59 +589,88 @@
         <div class="content-area">
             <!-- Dashboard Tab -->
             <div id="dashboard" class="tab-content active">
-                <h2>Como você está hoje?</h2>
-
-                <div class="dashboard-grid">
-                    <div class="dashboard-card mood-tracker">
-                        <h3>Registro Rápido de Humor</h3>
-                        <div class="mood-scale">
-                            <span class="mood-emoji" onclick="selectMood(1, this)" title="Muito mal">😔</span>
-                            <span class="mood-emoji" onclick="selectMood(2, this)" title="Mal">😕</span>
-                            <span class="mood-emoji" onclick="selectMood(3, this)" title="Neutro">😐</span>
-                            <span class="mood-emoji" onclick="selectMood(4, this)" title="Bem">🙂</span>
-                            <span class="mood-emoji" onclick="selectMood(5, this)" title="Muito bem">😊</span>
+                <!-- Quick Mood Registration Card -->
+                <div class="dashboard-card mood-tracker" style="margin-bottom: 30px;">
+                    <h2 style="margin-bottom: 20px; text-align: center;">Como você está hoje?</h2>
+                    <div class="mood-scale">
+                        <span class="mood-emoji" onclick="saveMoodQuick(1)" title="Muito mal">😔</span>
+                        <span class="mood-emoji" onclick="saveMoodQuick(2)" title="Mal">😕</span>
+                        <span class="mood-emoji" onclick="saveMoodQuick(3)" title="Neutro">😐</span>
+                        <span class="mood-emoji" onclick="saveMoodQuick(4)" title="Bem">🙂</span>
+                        <span class="mood-emoji" onclick="saveMoodQuick(5)" title="Muito bem">😊</span>
+                    </div>
+                    <p style="text-align: center; margin-top: 15px; font-size: 13px; color: #666;">
+                        💡 Clique no emoji para registrar rapidamente
+                        <button class="btn" style="padding: 6px 12px; margin-left: 10px; font-size: 13px;" onclick="showDetailedMoodForm()">
+                            Adicionar nota
+                        </button>
+                    </p>
+                    <div id="detailedMoodForm" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+                        <div class="form-group">
+                            <label>Escolha seu humor:</label>
+                            <div class="mood-scale">
+                                <span class="mood-emoji" onclick="selectMood(1, this)" title="Muito mal">😔</span>
+                                <span class="mood-emoji" onclick="selectMood(2, this)" title="Mal">😕</span>
+                                <span class="mood-emoji" onclick="selectMood(3, this)" title="Neutro">😐</span>
+                                <span class="mood-emoji" onclick="selectMood(4, this)" title="Bem">🙂</span>
+                                <span class="mood-emoji" onclick="selectMood(5, this)" title="Muito bem">😊</span>
+                            </div>
                         </div>
                         <div class="form-group">
-                            <textarea id="moodNote" rows="2" placeholder="Notas opcionais..."></textarea>
+                            <label>Notas (opcional):</label>
+                            <textarea id="moodNote" rows="2" placeholder="O que está acontecendo?"></textarea>
                         </div>
-                        <button class="btn btn-success" onclick="saveMood()">Registrar Humor</button>
+                        <button class="btn btn-success" onclick="saveMood()">Registrar com Nota</button>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- Insight Card (Will be populated by A2) -->
+                    <div class="dashboard-card" id="insightCard" style="border-left: 4px solid var(--accent);">
+                        <h3>💡 Insight da Semana</h3>
+                        <p style="margin-top: 10px; font-size: 15px;" id="insightText">
+                            Continue registrando seu humor para receber insights personalizados.
+                        </p>
                     </div>
 
-                    <div class="dashboard-card">
-                        <h3>Resumo de Hoje</h3>
-                        <p><strong>Registros:</strong></p>
-                        <ul id="todaySummary" style="margin-left: 20px; margin-top: 10px;">
-                            <li>Carregando...</li>
-                        </ul>
-                    </div>
-
-                    <div class="dashboard-card">
-                        <h3>Comparação Semanal</h3>
-                        <div id="weeklyComparison">
-                            <p><strong>Semana atual vs anterior:</strong></p>
-                            <div id="comparisonStats" style="margin-top: 10px;">
-                                Carregando...
-                            </div>
+                    <!-- Mood Average Card -->
+                    <div class="dashboard-card" style="border-left: 4px solid var(--primary);">
+                        <h3>📈 Humor da Semana</h3>
+                        <div id="weekMoodSummary" style="margin-top: 15px;">
+                            <p style="font-size: 28px; font-weight: bold; text-align: center;" id="weekMoodAvg">-</p>
+                            <p style="text-align: center; color: #666; font-size: 14px;" id="weekMoodChange">Sem dados ainda</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="dashboard-card" style="margin-top: 20px;">
+                <!-- Mood Chart -->
+                <div class="dashboard-card" id="moodChartCard" style="margin-top: 20px; display: none;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                         <h3>Tendência de Humor</h3>
                         <div>
                             <button class="period-btn" onclick="changeMoodPeriod(7)">7 dias</button>
-                            <button class="period-btn" onclick="changeMoodPeriod(14)">14 dias</button>
                             <button class="period-btn" onclick="changeMoodPeriod(30)">30 dias</button>
                         </div>
                     </div>
-                    <canvas id="moodChart" style="max-height: 300px;"></canvas>
+                    <canvas id="moodChart" style="max-height: 350px;"></canvas>
                 </div>
 
-                <div class="dashboard-card" style="margin-top: 20px;">
-                    <h3>Emoções da Semana (Heatmap)</h3>
-                    <div id="emotionHeatmap" style="margin-top: 15px;">
-                        Carregando...
+                <!-- Empty State Placeholder -->
+                <div class="dashboard-card" id="emptyStatePlaceholder" style="margin-top: 20px; text-align: center; padding: 40px;">
+                    <h3 style="margin-bottom: 15px;">🌱 Comece sua jornada</h3>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        Registre seu humor algumas vezes para ver gráficos e tendências aparecerem aqui.
+                    </p>
+                    <p style="color: #999; font-size: 14px;">
+                        💡 Dica: Tente registrar seu humor pelo menos 3 vezes esta semana
+                    </p>
+                </div>
+
+                <!-- Top 3 Emotions (Will be implemented in A1) -->
+                <div class="dashboard-card" id="top3EmotionsCard" style="margin-top: 20px; display: none;">
+                    <h3>🎭 Top 3 Emoções (7 dias)</h3>
+                    <div id="top3Emotions" style="margin-top: 15px;">
+                        <!-- Will be populated by A1 -->
                     </div>
                 </div>
             </div>
@@ -654,9 +733,12 @@
                 <h2>Minha Rotina Diária</h2>
 
                 <div class="dashboard-card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                         <h3>Progresso do Dia</h3>
-                        <button class="btn btn-danger" style="padding: 8px 16px;" onclick="resetRoutine()">Resetar</button>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn" style="padding: 8px 16px; background: var(--secondary);" onclick="openRoutineConfigModal()">⚙️ Configurar Rotina</button>
+                            <button class="btn btn-danger" style="padding: 8px 16px;" onclick="resetRoutine()">Resetar</button>
+                        </div>
                     </div>
                     <div class="progress-bar">
                         <div class="progress-fill" id="routineProgress" style="width: 0%">0%</div>
@@ -866,6 +948,30 @@
             </div>
             <div id="skillModalContent">
                 <!-- Content will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Routine Configuration Modal -->
+    <div id="routineConfigModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2>⚙️ Configurar Minha Rotina</h2>
+                <span class="close-modal" onclick="closeRoutineConfigModal()">&times;</span>
+            </div>
+            <p style="margin-bottom: 20px; color: #666;">Personalize suas atividades diárias. Você pode adicionar, remover e reordenar as atividades.</p>
+
+            <div id="activityConfigList" style="max-height: 400px; overflow-y: auto;">
+                <!-- Activities will be rendered here -->
+            </div>
+
+            <button class="btn" style="width: 100%; margin-top: 15px; background: var(--accent);" onclick="addNewActivity()">
+                ➕ Adicionar Atividade
+            </button>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-success" style="flex: 1;" onclick="saveRoutineConfig()">Salvar Configuração</button>
+                <button class="btn" style="flex: 1; background: #999;" onclick="resetToDefaultRoutine()">Restaurar Padrão</button>
             </div>
         </div>
     </div>
@@ -1259,8 +1365,6 @@
 
                 // Render charts and visualizations
                 await this.renderMoodChart(this.currentPeriod);
-                await this.updateWeeklyComparison();
-                await this.renderEmotionHeatmap();
 
                 // Load practice and session data
                 await this.loadPracticeHistory();
@@ -1278,18 +1382,74 @@
             },
 
             async updateDashboard() {
-                const today = new Date().toISOString().split('T')[0];
                 const moods = await this.store.getAll('moods');
                 const emotions = await this.store.getAll('emotions');
 
-                const todayMoods = moods.filter(m => m.date === today);
-                const todayEmotions = emotions.filter(e => e.date === today);
+                // Get data for last 7 days
+                const today = new Date();
+                const sevenDaysAgo = new Date(today);
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-                const summary = document.getElementById('todaySummary');
-                summary.innerHTML = `
-                    <li>Humor: ${todayMoods.length} registro(s)</li>
-                    <li>Emoções: ${todayEmotions.length} registro(s)</li>
-                `;
+                const weekMoods = moods.filter(m => new Date(m.date) >= sevenDaysAgo);
+                const weekEmotions = emotions.filter(e => new Date(e.date) >= sevenDaysAgo);
+
+                // Update Week Mood Average Card
+                const weekMoodAvgEl = document.getElementById('weekMoodAvg');
+                const weekMoodChangeEl = document.getElementById('weekMoodChange');
+
+                if (weekMoods.length >= 3) {
+                    const avgMood = (weekMoods.reduce((sum, m) => sum + m.value, 0) / weekMoods.length).toFixed(1);
+                    const emojis = ['', '😔', '😕', '😐', '🙂', '😊'];
+                    const rounded = Math.round(parseFloat(avgMood));
+
+                    weekMoodAvgEl.textContent = `${emojis[rounded]} ${avgMood}/5`;
+
+                    // Calculate change vs previous week
+                    const fourteenDaysAgo = new Date(today);
+                    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+                    const prevWeekMoods = moods.filter(m => {
+                        const date = new Date(m.date);
+                        return date >= fourteenDaysAgo && date < sevenDaysAgo;
+                    });
+
+                    if (prevWeekMoods.length >= 3) {
+                        const prevAvg = prevWeekMoods.reduce((sum, m) => sum + m.value, 0) / prevWeekMoods.length;
+                        const change = ((avgMood - prevAvg) / prevAvg * 100).toFixed(0);
+                        const arrow = change > 0 ? '↑' : change < 0 ? '↓' : '→';
+                        const color = change > 0 ? '#82ca9d' : change < 0 ? '#f67280' : '#666';
+
+                        weekMoodChangeEl.innerHTML = `<span style="color: ${color};">${arrow} ${Math.abs(change)}% vs semana anterior</span>`;
+                    } else {
+                        weekMoodChangeEl.textContent = `${weekMoods.length} registros esta semana`;
+                    }
+                } else {
+                    weekMoodAvgEl.textContent = '-';
+                    weekMoodChangeEl.textContent = 'Registre pelo menos 3 humores';
+                }
+
+                // Show/hide visualizations based on data availability (C3)
+                const moodChartCard = document.getElementById('moodChartCard');
+                const emptyStatePlaceholder = document.getElementById('emptyStatePlaceholder');
+
+                if (weekMoods.length >= 3) {
+                    moodChartCard.style.display = 'block';
+                    emptyStatePlaceholder.style.display = 'none';
+                } else {
+                    moodChartCard.style.display = 'none';
+                    emptyStatePlaceholder.style.display = 'block';
+                }
+
+                // Top 3 Emotions (A1)
+                const top3EmotionsCard = document.getElementById('top3EmotionsCard');
+                if (weekEmotions.length >= 3) {
+                    top3EmotionsCard.style.display = 'block';
+                    await this.renderTop3Emotions();
+                } else {
+                    top3EmotionsCard.style.display = 'none';
+                }
+
+                // Weekly Insight (A2)
+                await this.renderWeeklyInsight();
             },
 
             async loadEmotionHistory() {
@@ -1310,6 +1470,150 @@
                         ${e.thoughts ? `<p><strong>Pensamentos:</strong> ${e.thoughts}</p>` : ''}
                     </div>
                 `).join('');
+            },
+
+            async renderTop3Emotions() {
+                const emotions = await this.store.getAll('emotions');
+
+                // Get emotions from last 7 days
+                const today = new Date();
+                const sevenDaysAgo = new Date(today);
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+                const weekEmotions = emotions.filter(e => new Date(e.date) >= sevenDaysAgo);
+
+                if (weekEmotions.length < 3) {
+                    return; // Card will be hidden by updateDashboard()
+                }
+
+                // Count emotions
+                const emotionCounts = {};
+                weekEmotions.forEach(e => {
+                    const type = e.type.charAt(0).toUpperCase() + e.type.slice(1);
+                    emotionCounts[type] = (emotionCounts[type] || 0) + 1;
+                });
+
+                // Get top 3
+                const sorted = Object.entries(emotionCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 3);
+
+                // Emotion emojis
+                const emotionEmojis = {
+                    'Alegria': '😊',
+                    'Tristeza': '😢',
+                    'Raiva': '😠',
+                    'Medo': '😰',
+                    'Ansiedade': '😰',
+                    'Calma': '😌',
+                    'Frustração': '😤',
+                    'Esperança': '🌟',
+                    'Vergonha': '😳'
+                };
+
+                const container = document.getElementById('top3Emotions');
+                container.innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                        ${sorted.map(([emotion, count]) => `
+                            <div style="text-align: center; padding: 20px; background: rgba(107, 91, 149, 0.1); border-radius: 10px;">
+                                <div style="font-size: 36px; margin-bottom: 10px;">${emotionEmojis[emotion] || '😊'}</div>
+                                <div style="font-weight: bold; margin-bottom: 5px;">${emotion}</div>
+                                <div style="color: #666; font-size: 14px;">${count}x esta semana</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            },
+
+            async generateWeeklyInsight() {
+                const moods = await this.store.getAll('moods');
+                const practices = await this.store.getAll('practices');
+
+                // Get data for last 2 weeks
+                const today = new Date();
+                const sevenDaysAgo = new Date(today);
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                const fourteenDaysAgo = new Date(today);
+                fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
+                const thisWeekMoods = moods.filter(m => new Date(m.date) >= sevenDaysAgo);
+                const lastWeekMoods = moods.filter(m => {
+                    const date = new Date(m.date);
+                    return date >= fourteenDaysAgo && date < sevenDaysAgo;
+                });
+                const thisWeekPractices = practices.filter(p => new Date(p.date) >= sevenDaysAgo);
+
+                // Insight #1: Mood trend
+                if (thisWeekMoods.length >= 3 && lastWeekMoods.length >= 3) {
+                    const thisAvg = thisWeekMoods.reduce((sum, m) => sum + m.value, 0) / thisWeekMoods.length;
+                    const lastAvg = lastWeekMoods.reduce((sum, m) => sum + m.value, 0) / lastWeekMoods.length;
+                    const delta = ((thisAvg - lastAvg) / lastAvg * 100).toFixed(0);
+
+                    if (delta > 10) {
+                        return {
+                            emoji: '🎉',
+                            text: `Seu humor melhorou ${delta}% esta semana! Continue assim.`,
+                            type: 'positive'
+                        };
+                    } else if (delta < -10) {
+                        return {
+                            emoji: '💙',
+                            text: `Seu humor caiu ${Math.abs(delta)}% esta semana. Considere usar habilidades DBT (TIPP, ACCEPTS).`,
+                            type: 'support'
+                        };
+                    }
+                }
+
+                // Insight #2: Practice consistency
+                if (thisWeekPractices.length >= 4) {
+                    return {
+                        emoji: '🧘',
+                        text: `Você praticou mindfulness ${thisWeekPractices.length}x esta semana. Excelente consistência!`,
+                        type: 'positive'
+                    };
+                }
+
+                // Insight #3: Low mood streak
+                const last3Days = moods.slice(-3);
+                if (last3Days.length === 3 && last3Days.every(m => m.value <= 2)) {
+                    return {
+                        emoji: '💙',
+                        text: `3 dias seguidos com humor baixo. Lembre-se de usar suas habilidades DBT. Você não está sozinho.`,
+                        type: 'support'
+                    };
+                }
+
+                // Insight #4: Good mood streak
+                const last5Days = moods.slice(-5);
+                if (last5Days.length === 5 && last5Days.every(m => m.value >= 4)) {
+                    return {
+                        emoji: '🌟',
+                        text: `5 dias seguidos com humor positivo! Você está indo muito bem.`,
+                        type: 'positive'
+                    };
+                }
+
+                // Fallback
+                return {
+                    emoji: '🌱',
+                    text: 'Continue registrando seu humor diariamente para receber insights personalizados.',
+                    type: 'neutral'
+                };
+            },
+
+            async renderWeeklyInsight() {
+                const insight = await this.generateWeeklyInsight();
+                const insightCard = document.getElementById('insightCard');
+                const insightText = document.getElementById('insightText');
+
+                const colors = {
+                    positive: '#82ca9d',
+                    support: '#88b0d3',
+                    neutral: '#ffb447'
+                };
+
+                insightCard.style.borderLeftColor = colors[insight.type];
+                insightText.textContent = `${insight.emoji} ${insight.text}`;
             },
 
             async updateBackupBadge() {
@@ -1360,34 +1664,38 @@
             async renderMoodChart(days = 7) {
                 const moods = await this.store.getAll('moods');
 
-                // Get data for the last N days
+                // Get data for the last N days (only days with data)
                 const endDate = new Date();
                 const startDate = new Date();
                 startDate.setDate(startDate.getDate() - days);
 
-                // Create labels for all days in range
+                // Collect only days with mood data
                 const labels = [];
                 const dataPoints = [];
 
                 for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
                     const dateStr = d.toISOString().split('T')[0];
-                    labels.push(dateStr);
-
-                    // Get average mood for this day
                     const dayMoods = moods.filter(m => m.date === dateStr);
+
                     if (dayMoods.length > 0) {
                         const avg = dayMoods.reduce((sum, m) => sum + m.value, 0) / dayMoods.length;
-                        dataPoints.push(avg.toFixed(1));
-                    } else {
-                        dataPoints.push(null);
+
+                        // Format label based on period
+                        const date = new Date(dateStr + 'T00:00:00');
+                        let label;
+                        if (days === 7) {
+                            // Show day of week for 7-day view
+                            const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+                            label = weekDays[date.getDay()];
+                        } else {
+                            // Show date for 30-day view
+                            label = `${date.getDate()}/${date.getMonth() + 1}`;
+                        }
+
+                        labels.push(label);
+                        dataPoints.push(parseFloat(avg.toFixed(1)));
                     }
                 }
-
-                // Format labels for display (show day/month)
-                const formattedLabels = labels.map(dateStr => {
-                    const date = new Date(dateStr);
-                    return `${date.getDate()}/${date.getMonth() + 1}`;
-                });
 
                 const ctx = document.getElementById('moodChart');
                 if (!ctx) return;
@@ -1400,7 +1708,7 @@
                 this.moodChart = new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: formattedLabels,
+                        labels: labels,
                         datasets: [{
                             label: 'Humor Médio',
                             data: dataPoints,
@@ -1408,12 +1716,15 @@
                             backgroundColor: 'rgba(107, 91, 149, 0.1)',
                             tension: 0.3,
                             fill: true,
-                            spanGaps: true
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            pointBackgroundColor: '#6b5b95',
+                            borderWidth: 3
                         }]
                     },
                     options: {
                         responsive: true,
-                        maintainAspectRatio: true,
+                        maintainAspectRatio: false,
                         plugins: {
                             legend: {
                                 display: false
@@ -1424,7 +1735,7 @@
                                         const emojis = ['', '😔', '😕', '😐', '🙂', '😊'];
                                         const value = context.parsed.y;
                                         const rounded = Math.round(value);
-                                        return `${value} ${emojis[rounded] || ''}`;
+                                        return `Humor: ${value}/5 ${emojis[rounded] || ''}`;
                                     }
                                 }
                             }
@@ -1440,12 +1751,19 @@
                                         const emojis = ['', '😔', '😕', '😐', '🙂', '😊'];
                                         return emojis[value] || value;
                                     }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
                                 }
                             },
                             x: {
                                 ticks: {
-                                    maxRotation: 45,
-                                    minRotation: 45
+                                    maxRotation: 0,
+                                    minRotation: 0,
+                                    autoSkip: false
+                                },
+                                grid: {
+                                    display: false
                                 }
                             }
                         }
@@ -1698,6 +2016,32 @@
             App.currentMood = value;
         }
 
+        // Quick mood registration (1-click)
+        async function saveMoodQuick(value) {
+            const mood = Schema.Mood.create(value, '');
+
+            try {
+                await App.store.save('moods', mood);
+
+                // Visual feedback
+                const emojis = ['', '😔', '😕', '😐', '🙂', '😊'];
+                showNotification(`Humor registrado! ${emojis[value]}`, 'success');
+
+                // Update all visualizations
+                await App.updateDashboard();
+                await App.renderMoodChart(App.currentPeriod);
+            } catch (error) {
+                showNotification('Erro ao salvar: ' + error.message, 'error');
+            }
+        }
+
+        // Show detailed mood form
+        function showDetailedMoodForm() {
+            const form = document.getElementById('detailedMoodForm');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Save mood with note (detailed form)
         async function saveMood() {
             if (!App.currentMood) {
                 showNotification('Selecione um humor primeiro!', 'error');
@@ -1718,14 +2062,14 @@
                 showNotification('Humor registrado com sucesso! 🎉', 'success');
 
                 // Clear form
-                document.querySelectorAll('.mood-emoji').forEach(e => e.classList.remove('selected'));
+                document.querySelectorAll('#detailedMoodForm .mood-emoji').forEach(e => e.classList.remove('selected'));
                 document.getElementById('moodNote').value = '';
+                document.getElementById('detailedMoodForm').style.display = 'none';
                 App.currentMood = null;
 
                 // Update all visualizations
                 await App.updateDashboard();
                 await App.renderMoodChart(App.currentPeriod);
-                await App.updateWeeklyComparison();
             } catch (error) {
                 showNotification('Erro ao salvar: ' + error.message, 'error');
             }
@@ -1766,8 +2110,6 @@
                 // Update all visualizations
                 await App.loadEmotionHistory();
                 await App.updateDashboard();
-                await App.updateWeeklyComparison();
-                await App.renderEmotionHeatmap();
             } catch (error) {
                 showNotification('Erro ao salvar: ' + error.message, 'error');
             }
@@ -1861,14 +2203,173 @@
             { time: '23:30', title: 'Dormir', description: 'Descanso necessário' }
         ];
 
+        // Temporary storage for config being edited
+        let currentConfigActivities = null;
+
+        // Load routine configuration (or create default)
+        async function loadRoutineConfig() {
+            let config = await App.store.getMetadata('routineConfig');
+            if (!config) {
+                // First time - create default config
+                config = {
+                    activities: defaultRoutineActivities.map((a, i) => ({
+                        id: 'act_' + Date.now() + '_' + i,
+                        time: a.time,
+                        title: a.title,
+                        description: a.description,
+                        enabled: true
+                    })),
+                    version: 1,
+                    lastUpdated: new Date().toISOString()
+                };
+                await App.store.setMetadata('routineConfig', config);
+            }
+            return config;
+        }
+
+        // Render activity configuration list
+        function renderActivityConfigList(activities) {
+            const container = document.getElementById('activityConfigList');
+            container.innerHTML = activities.map((activity, index) => `
+                <div class="activity-config-item" data-id="${activity.id}">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                        <label style="min-width: 80px; margin: 0;">Horário:</label>
+                        <input type="time" value="${activity.time}"
+                               onchange="updateActivityField('${activity.id}', 'time', this.value)"
+                               style="flex: 1;">
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <label style="display: block; margin-bottom: 5px;">Título:</label>
+                        <input type="text" value="${activity.title}"
+                               onchange="updateActivityField('${activity.id}', 'title', this.value)"
+                               placeholder="Ex: Acordar e tomar café">
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <label style="display: block; margin-bottom: 5px;">Descrição:</label>
+                        <input type="text" value="${activity.description}"
+                               onchange="updateActivityField('${activity.id}', 'description', this.value)"
+                               placeholder="Ex: Cuidar dos cachorros">
+                    </div>
+                    <div class="activity-config-controls">
+                        ${index > 0 ? `<button class="btn-move" onclick="moveActivityUp('${activity.id}')">↑</button>` : ''}
+                        ${index < activities.length - 1 ? `<button class="btn-move" onclick="moveActivityDown('${activity.id}')">↓</button>` : ''}
+                        <button class="btn-remove" onclick="removeActivity('${activity.id}')">🗑️ Remover</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load current config into temp storage when modal opens
+        async function openRoutineConfigModal() {
+            const config = await loadRoutineConfig();
+            currentConfigActivities = JSON.parse(JSON.stringify(config.activities)); // Deep copy
+            renderActivityConfigList(currentConfigActivities);
+            document.getElementById('routineConfigModal').classList.add('active');
+        }
+
+        // Close routine configuration modal
+        function closeRoutineConfigModal() {
+            document.getElementById('routineConfigModal').classList.remove('active');
+        }
+
+        // Update activity field
+        function updateActivityField(id, field, value) {
+            const activity = currentConfigActivities.find(a => a.id === id);
+            if (activity) {
+                activity[field] = value;
+            }
+        }
+
+        // Add new activity
+        function addNewActivity() {
+            const newActivity = {
+                id: 'act_' + Date.now(),
+                time: '12:00',
+                title: 'Nova Atividade',
+                description: 'Descrição da atividade',
+                enabled: true
+            };
+            currentConfigActivities.push(newActivity);
+            renderActivityConfigList(currentConfigActivities);
+        }
+
+        // Remove activity
+        function removeActivity(id) {
+            if (currentConfigActivities.length <= 1) {
+                showNotification('Você precisa ter pelo menos uma atividade!', 'error');
+                return;
+            }
+            if (confirm('Remover esta atividade?')) {
+                currentConfigActivities = currentConfigActivities.filter(a => a.id !== id);
+                renderActivityConfigList(currentConfigActivities);
+            }
+        }
+
+        // Move activity up
+        function moveActivityUp(id) {
+            const index = currentConfigActivities.findIndex(a => a.id === id);
+            if (index > 0) {
+                [currentConfigActivities[index - 1], currentConfigActivities[index]] =
+                [currentConfigActivities[index], currentConfigActivities[index - 1]];
+                renderActivityConfigList(currentConfigActivities);
+            }
+        }
+
+        // Move activity down
+        function moveActivityDown(id) {
+            const index = currentConfigActivities.findIndex(a => a.id === id);
+            if (index < currentConfigActivities.length - 1) {
+                [currentConfigActivities[index], currentConfigActivities[index + 1]] =
+                [currentConfigActivities[index + 1], currentConfigActivities[index]];
+                renderActivityConfigList(currentConfigActivities);
+            }
+        }
+
+        // Save routine configuration
+        async function saveRoutineConfig() {
+            const config = {
+                activities: currentConfigActivities,
+                version: 1,
+                lastUpdated: new Date().toISOString()
+            };
+            await App.store.setMetadata('routineConfig', config);
+            await renderRoutine();
+            closeRoutineConfigModal();
+            showNotification('Rotina atualizada com sucesso! 🎉', 'success');
+        }
+
+        // Reset to default routine
+        async function resetToDefaultRoutine() {
+            if (confirm('Restaurar rotina padrão? Suas personalizações serão perdidas.')) {
+                const config = {
+                    activities: defaultRoutineActivities.map((a, i) => ({
+                        id: 'act_' + Date.now() + '_' + i,
+                        time: a.time,
+                        title: a.title,
+                        description: a.description,
+                        enabled: true
+                    })),
+                    version: 1,
+                    lastUpdated: new Date().toISOString()
+                };
+                await App.store.setMetadata('routineConfig', config);
+                currentConfigActivities = JSON.parse(JSON.stringify(config.activities));
+                renderActivityConfigList(currentConfigActivities);
+                await renderRoutine();
+                showNotification('Rotina restaurada para o padrão!', 'success');
+            }
+        }
+
+        // Render routine (uses custom config)
         async function renderRoutine() {
+            const config = await loadRoutineConfig();
             const routineState = await App.loadRoutineState();
             const container = document.getElementById('routineActivities');
 
-            container.innerHTML = defaultRoutineActivities.map((activity, index) => {
-                const isCompleted = routineState[index] || false;
+            container.innerHTML = config.activities.map((activity, index) => {
+                const isCompleted = routineState[activity.id] || false;
                 return `
-                    <div class="dashboard-card" style="margin-bottom: 15px; cursor: pointer; transition: all 0.3s; ${isCompleted ? 'background: linear-gradient(135deg, rgba(130, 202, 157, 0.2) 0%, rgba(130, 202, 157, 0.1) 100%); border-left: 4px solid #82ca9d;' : ''}" onclick="toggleActivity(${index})">
+                    <div class="dashboard-card" style="margin-bottom: 15px; cursor: pointer; transition: all 0.3s; ${isCompleted ? 'background: linear-gradient(135deg, rgba(130, 202, 157, 0.2) 0%, rgba(130, 202, 157, 0.1) 100%); border-left: 4px solid #82ca9d;' : ''}" onclick="toggleActivity('${activity.id}')">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div style="flex: 1;">
                                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -1885,19 +2386,19 @@
                 `;
             }).join('');
 
-            updateRoutineProgress(routineState);
+            updateRoutineProgress(routineState, config.activities);
         }
 
-        async function toggleActivity(index) {
+        async function toggleActivity(id) {
             const routineState = await App.loadRoutineState();
-            routineState[index] = !routineState[index];
+            routineState[id] = !routineState[id];
             await App.saveRoutineState(routineState);
             await renderRoutine();
         }
 
-        function updateRoutineProgress(routineState) {
+        async function updateRoutineProgress(routineState, activities) {
             const completed = Object.values(routineState).filter(v => v).length;
-            const total = defaultRoutineActivities.length;
+            const total = activities.length;
             const percentage = Math.round((completed / total) * 100);
 
             const progressBar = document.getElementById('routineProgress');

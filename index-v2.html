@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Espaço Terapêutico - DBT v2</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -517,8 +518,14 @@
             <button class="nav-tab" data-tab="emotions" onclick="switchTab('emotions', this)">
                 <span>💭</span> Emoções
             </button>
+            <button class="nav-tab" data-tab="routine" onclick="switchTab('routine', this)">
+                <span>📅</span> Rotina
+            </button>
             <button class="nav-tab" data-tab="mindfulness" onclick="switchTab('mindfulness', this)">
                 <span>🧘</span> Mindfulness
+            </button>
+            <button class="nav-tab" data-tab="skills" onclick="switchTab('skills', this)">
+                <span>🛠️</span> Habilidades
             </button>
             <button class="nav-tab" data-tab="sessions" onclick="switchTab('sessions', this)">
                 <span>📝</span> Sessões
@@ -642,6 +649,98 @@
                 <div id="emotionHistory"></div>
             </div>
 
+            <!-- Routine Tab -->
+            <div id="routine" class="tab-content">
+                <h2>Minha Rotina Diária</h2>
+
+                <div class="dashboard-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3>Progresso do Dia</h3>
+                        <button class="btn btn-danger" style="padding: 8px 16px;" onclick="resetRoutine()">Resetar</button>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="routineProgress" style="width: 0%">0%</div>
+                    </div>
+                </div>
+
+                <div id="routineActivities" style="margin-top: 20px;">
+                    <!-- Activities will be rendered here -->
+                </div>
+            </div>
+
+            <!-- Skills Tab -->
+            <div id="skills" class="tab-content">
+                <h2>Habilidades DBT</h2>
+
+                <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                    <div class="dashboard-card" style="cursor: pointer; transition: transform 0.3s;" onclick="showSkillDetails('dearman')">
+                        <h3 style="margin-bottom: 10px;">📢 DEAR MAN</h3>
+                        <p style="font-size: 14px; color: #666;">Efetividade Interpessoal</p>
+                        <p style="margin-top: 10px; font-size: 13px;">Técnica para pedir o que você precisa de forma efetiva</p>
+                    </div>
+
+                    <div class="dashboard-card" style="cursor: pointer; transition: transform 0.3s;" onclick="showSkillDetails('tipp')">
+                        <h3 style="margin-bottom: 10px;">❄️ TIPP</h3>
+                        <p style="font-size: 14px; color: #666;">Habilidades de Crise</p>
+                        <p style="margin-top: 10px; font-size: 13px;">Mudar a química corporal rapidamente</p>
+                    </div>
+
+                    <div class="dashboard-card" style="cursor: pointer; transition: transform 0.3s;" onclick="showSkillDetails('stop')">
+                        <h3 style="margin-bottom: 10px;">🛑 STOP</h3>
+                        <p style="font-size: 14px; color: #666;">Regulação Emocional</p>
+                        <p style="margin-top: 10px; font-size: 13px;">Pausar antes de agir impulsivamente</p>
+                    </div>
+
+                    <div class="dashboard-card" style="cursor: pointer; transition: transform 0.3s;" onclick="showSkillDetails('accepts')">
+                        <h3 style="margin-bottom: 10px;">✅ ACCEPTS</h3>
+                        <p style="font-size: 14px; color: #666;">Tolerância ao Mal-estar</p>
+                        <p style="margin-top: 10px; font-size: 13px;">Distrair-se de emoções intensas</p>
+                    </div>
+                </div>
+
+                <div class="dashboard-card" style="margin-top: 30px;">
+                    <h3>Minha Carta ACCEPTS Personalizada</h3>
+                    <p style="margin-bottom: 15px; font-size: 14px; color: #666;">Preencha com estratégias que funcionam para você</p>
+
+                    <div class="form-group">
+                        <label>Activities - Atividades que me distraem</label>
+                        <textarea id="acceptsActivities" rows="2" placeholder="Ex: Jogar, programar, assistir série..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Contributing - Formas de contribuir</label>
+                        <textarea id="acceptsContribute" rows="2" placeholder="Ex: Ajudar alguém, fazer algo útil..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Comparisons - Comparações úteis</label>
+                        <textarea id="acceptsCompare" rows="2" placeholder="Ex: Lembrar de momentos piores que superei..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Emotions - Emoções opostas</label>
+                        <textarea id="acceptsEmotions" rows="2" placeholder="Ex: Assistir comédia quando triste..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Pushing away - Afastar pensamentos</label>
+                        <textarea id="acceptsPushing" rows="2" placeholder="Ex: Visualizar guardar preocupações em uma caixa..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Thoughts - Outros pensamentos</label>
+                        <textarea id="acceptsThoughts" rows="2" placeholder="Ex: Contar de 100 a 0, resolver quebra-cabeça..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sensations - Sensações físicas intensas</label>
+                        <textarea id="acceptsSensations" rows="2" placeholder="Ex: Água gelada no rosto, segurar gelo..."></textarea>
+                    </div>
+
+                    <button class="btn btn-success" onclick="saveAcceptsCard()">Salvar Carta ACCEPTS</button>
+                </div>
+            </div>
+
             <!-- Mindfulness Tab -->
             <div id="mindfulness" class="tab-content">
                 <h2>Práticas de Mindfulness</h2>
@@ -734,6 +833,7 @@
                     <div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
                         <button class="btn btn-success" onclick="exportBackup()">📥 Baixar Backup JSON</button>
                         <button class="btn btn-secondary" onclick="document.getElementById('restoreInput').click()">📤 Restaurar Backup</button>
+                        <button class="btn" style="background: #ff6b6b;" onclick="exportPDF()">📄 Gerar Relatório PDF</button>
                         <input type="file" id="restoreInput" accept=".json" style="display: none;" onchange="restoreBackup(event)">
                     </div>
                 </div>
@@ -754,6 +854,19 @@
                 <span class="close-modal" onclick="closeQuickModal()">&times;</span>
             </div>
             <p>Humor salvo com sucesso! 🎉</p>
+        </div>
+    </div>
+
+    <!-- Skill Details Modal -->
+    <div id="skillModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="skillModalTitle">Habilidade DBT</h2>
+                <span class="close-modal" onclick="closeSkillModal()">&times;</span>
+            </div>
+            <div id="skillModalContent">
+                <!-- Content will be injected here -->
+            </div>
         </div>
     </div>
 
@@ -1154,6 +1267,10 @@
                 await this.updatePracticeStats();
                 await this.loadSessionHistory();
 
+                // Load routine and ACCEPTS card
+                await renderRoutine();
+                await loadAcceptsCard();
+
                 document.getElementById('dataStatus').textContent =
                     this.store.ready ? '✅ Persistência ativa' : '⚠️ Apenas localStorage';
 
@@ -1531,6 +1648,17 @@
                         ${s.insights ? `<p><strong>Insights:</strong> ${s.insights}</p>` : ''}
                     </div>
                 `).join('');
+            },
+
+            async saveRoutineState(state) {
+                const today = new Date().toISOString().split('T')[0];
+                await this.store.setMetadata(`routine_${today}`, state);
+            },
+
+            async loadRoutineState() {
+                const today = new Date().toISOString().split('T')[0];
+                const state = await this.store.getMetadata(`routine_${today}`);
+                return state || {};
             }
         };
 
@@ -1713,6 +1841,328 @@
                 await App.updateStats();
             } catch (error) {
                 showNotification('Erro ao salvar: ' + error.message, 'error');
+            }
+        }
+
+        // ============================================================================
+        // ROUTINE FUNCTIONS
+        // ============================================================================
+
+        const defaultRoutineActivities = [
+            { time: '08:00', title: 'Acordar e tomar café', description: 'Cuidar dos cachorros' },
+            { time: '08:30', title: 'Exercício/Caminhada', description: '30 minutos de atividade física' },
+            { time: '09:00', title: 'Trabalho/Estudo', description: 'Foco nas atividades principais' },
+            { time: '12:00', title: 'Almoço', description: 'Pausa para refeição' },
+            { time: '14:00', title: 'Trabalho/Estudo', description: 'Continuar projetos' },
+            { time: '16:00', title: 'Pausa/Cuidados', description: 'Momento de autocuidado' },
+            { time: '18:00', title: 'Atividade Livre', description: 'Hobby ou descanso' },
+            { time: '20:00', title: 'Jantar', description: 'Refeição noturna' },
+            { time: '22:00', title: 'Mindfulness', description: 'Prática antes de dormir' },
+            { time: '23:30', title: 'Dormir', description: 'Descanso necessário' }
+        ];
+
+        async function renderRoutine() {
+            const routineState = await App.loadRoutineState();
+            const container = document.getElementById('routineActivities');
+
+            container.innerHTML = defaultRoutineActivities.map((activity, index) => {
+                const isCompleted = routineState[index] || false;
+                return `
+                    <div class="dashboard-card" style="margin-bottom: 15px; cursor: pointer; transition: all 0.3s; ${isCompleted ? 'background: linear-gradient(135deg, rgba(130, 202, 157, 0.2) 0%, rgba(130, 202, 157, 0.1) 100%); border-left: 4px solid #82ca9d;' : ''}" onclick="toggleActivity(${index})">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="font-weight: bold; color: var(--primary); min-width: 60px;">${activity.time}</span>
+                                    <div>
+                                        <strong>${activity.title}</strong>
+                                        <p style="font-size: 13px; color: #666; margin-top: 3px;">${activity.description}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <span style="font-size: 24px;">${isCompleted ? '✅' : '⬜'}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            updateRoutineProgress(routineState);
+        }
+
+        async function toggleActivity(index) {
+            const routineState = await App.loadRoutineState();
+            routineState[index] = !routineState[index];
+            await App.saveRoutineState(routineState);
+            await renderRoutine();
+        }
+
+        function updateRoutineProgress(routineState) {
+            const completed = Object.values(routineState).filter(v => v).length;
+            const total = defaultRoutineActivities.length;
+            const percentage = Math.round((completed / total) * 100);
+
+            const progressBar = document.getElementById('routineProgress');
+            progressBar.style.width = percentage + '%';
+            progressBar.textContent = percentage + '%';
+        }
+
+        async function resetRoutine() {
+            if (confirm('Resetar todas as atividades do dia?')) {
+                await App.saveRoutineState({});
+                await renderRoutine();
+                showNotification('Rotina resetada!', 'success');
+            }
+        }
+
+        // ============================================================================
+        // SKILLS & ACCEPTS FUNCTIONS
+        // ============================================================================
+
+        function showSkillDetails(skillName) {
+            const modal = document.getElementById('skillModal');
+            const title = document.getElementById('skillModalTitle');
+            const content = document.getElementById('skillModalContent');
+
+            const skills = {
+                dearman: {
+                    title: 'DEAR MAN - Efetividade Interpessoal',
+                    content: `
+                        <h3>Como usar DEAR MAN:</h3>
+                        <div style="margin-top: 15px;">
+                            <p style="margin-bottom: 10px;"><strong>D</strong>escrever - Descreva a situação de forma objetiva, sem julgamentos</p>
+                            <p style="margin-bottom: 10px;"><strong>E</strong>xpressar - Expresse seus sentimentos e opiniões claramente</p>
+                            <p style="margin-bottom: 10px;"><strong>A</strong>firmar - Afirme o que você quer ou precisa de forma específica</p>
+                            <p style="margin-bottom: 10px;"><strong>R</strong>eforçar - Reforce explicando os benefícios positivos</p>
+                            <hr style="margin: 20px 0;">
+                            <p style="margin-bottom: 10px;"><strong>M</strong>indful - Mantenha-se focado no seu objetivo</p>
+                            <p style="margin-bottom: 10px;"><strong>A</strong>ppear confident - Apareça confiante (postura, tom de voz)</p>
+                            <p style="margin-bottom: 10px;"><strong>N</strong>egotiate - Esteja disposto a negociar e fazer concessões</p>
+                        </div>
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(107, 91, 149, 0.1); border-radius: 10px;">
+                            <p style="font-size: 13px;"><strong>Exemplo:</strong> "Quando você chegou tarde sem avisar (D), eu fiquei preocupado (E). Eu gostaria que você me avisasse quando houver atrasos (A). Isso vai me deixar mais tranquilo e melhorar nossa relação (R)."</p>
+                        </div>
+                    `
+                },
+                tipp: {
+                    title: 'TIPP - Habilidades de Crise',
+                    content: `
+                        <h3>Mudar a química corporal rapidamente:</h3>
+                        <div style="margin-top: 15px;">
+                            <p style="margin-bottom: 10px;"><strong>T</strong>emperature - Mude a temperatura do corpo (água gelada no rosto, banho frio)</p>
+                            <p style="margin-bottom: 10px;"><strong>I</strong>ntense exercise - Exercício intenso (corrida, polichinelos, burpees)</p>
+                            <p style="margin-bottom: 10px;"><strong>P</strong>aced breathing - Respiração compassada (inspire 4s, segure 4s, expire 6s)</p>
+                            <p style="margin-bottom: 10px;"><strong>P</strong>aired muscle relaxation - Tensione e relaxe grupos musculares progressivamente</p>
+                        </div>
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(255, 107, 107, 0.1); border-radius: 10px;">
+                            <p style="font-size: 13px;"><strong>⚠️ Use TIPP quando:</strong> Emoções estão muito intensas (8-10) e você precisa reduzir rapidamente para pensar com clareza.</p>
+                        </div>
+                    `
+                },
+                stop: {
+                    title: 'STOP - Regulação Emocional',
+                    content: `
+                        <h3>Pausar antes de agir impulsivamente:</h3>
+                        <div style="margin-top: 15px;">
+                            <p style="margin-bottom: 10px;"><strong>S</strong>top - Pare! Não reaja imediatamente. Congele por um momento.</p>
+                            <p style="margin-bottom: 10px;"><strong>T</strong>ake a step back - Dê um passo atrás, tanto literal quanto mentalmente. Respire.</p>
+                            <p style="margin-bottom: 10px;"><strong>O</strong>bserve - Observe o que está acontecendo dentro e fora de você. Nomeie a emoção.</p>
+                            <p style="margin-bottom: 10px;"><strong>P</strong>roceed mindfully - Prossiga conscientemente. Pergunte: "Qual ação é efetiva agora?"</p>
+                        </div>
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(130, 202, 157, 0.1); border-radius: 10px;">
+                            <p style="font-size: 13px;"><strong>💡 Dica:</strong> STOP é especialmente útil quando você sente um impulso forte de fazer algo que pode ter consequências negativas.</p>
+                        </div>
+                    `
+                },
+                accepts: {
+                    title: 'ACCEPTS - Tolerância ao Mal-estar',
+                    content: `
+                        <h3>Distrair-se de emoções dolorosas:</h3>
+                        <div style="margin-top: 15px;">
+                            <p style="margin-bottom: 10px;"><strong>A</strong>ctivities - Faça atividades que ocupem sua mente</p>
+                            <p style="margin-bottom: 10px;"><strong>C</strong>ontributing - Contribua, ajude outras pessoas</p>
+                            <p style="margin-bottom: 10px;"><strong>C</strong>omparisons - Compare com momentos piores ou com outras pessoas</p>
+                            <p style="margin-bottom: 10px;"><strong>E</strong>motions - Provoque emoções opostas (comédia se está triste)</p>
+                            <p style="margin-bottom: 10px;"><strong>P</strong>ushing away - Afaste temporariamente os pensamentos dolorosos</p>
+                            <p style="margin-bottom: 10px;"><strong>T</strong>houghts - Pense em outras coisas (contar, quebra-cabeça)</p>
+                            <p style="margin-bottom: 10px;"><strong>S</strong>ensations - Use sensações físicas intensas (gelo, música alta)</p>
+                        </div>
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(255, 180, 71, 0.1); border-radius: 10px;">
+                            <p style="font-size: 13px;"><strong>📌 Lembre-se:</strong> Preencha sua Carta ACCEPTS personalizada abaixo com estratégias que funcionam especificamente para você!</p>
+                        </div>
+                    `
+                }
+            };
+
+            const skillData = skills[skillName];
+            title.textContent = skillData.title;
+            content.innerHTML = skillData.content;
+            modal.classList.add('active');
+        }
+
+        function closeSkillModal() {
+            document.getElementById('skillModal').classList.remove('active');
+        }
+
+        async function saveAcceptsCard() {
+            const accepts = {
+                activities: document.getElementById('acceptsActivities').value,
+                contribute: document.getElementById('acceptsContribute').value,
+                compare: document.getElementById('acceptsCompare').value,
+                emotions: document.getElementById('acceptsEmotions').value,
+                pushing: document.getElementById('acceptsPushing').value,
+                thoughts: document.getElementById('acceptsThoughts').value,
+                sensations: document.getElementById('acceptsSensations').value
+            };
+
+            await App.store.setMetadata('acceptsCard', accepts);
+            showNotification('Carta ACCEPTS salva com sucesso! 🎉', 'success');
+        }
+
+        async function loadAcceptsCard() {
+            const accepts = await App.store.getMetadata('acceptsCard');
+            if (accepts) {
+                document.getElementById('acceptsActivities').value = accepts.activities || '';
+                document.getElementById('acceptsContribute').value = accepts.contribute || '';
+                document.getElementById('acceptsCompare').value = accepts.compare || '';
+                document.getElementById('acceptsEmotions').value = accepts.emotions || '';
+                document.getElementById('acceptsPushing').value = accepts.pushing || '';
+                document.getElementById('acceptsThoughts').value = accepts.thoughts || '';
+                document.getElementById('acceptsSensations').value = accepts.sensations || '';
+            }
+        }
+
+        // ============================================================================
+        // PDF EXPORT FUNCTION
+        // ============================================================================
+
+        async function exportPDF() {
+            try {
+                showNotification('Gerando relatório PDF...', 'success');
+
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                // Get data
+                const moods = await App.store.getAll('moods');
+                const emotions = await App.store.getAll('emotions');
+                const practices = await App.store.getAll('practices');
+                const sessions = await App.store.getAll('sessions');
+
+                // Calculate date range (last 7 days)
+                const today = new Date();
+                const sevenDaysAgo = new Date(today);
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+                const weekMoods = moods.filter(m => new Date(m.date) >= sevenDaysAgo);
+                const weekEmotions = emotions.filter(e => new Date(e.date) >= sevenDaysAgo);
+                const weekPractices = practices.filter(p => new Date(p.date) >= sevenDaysAgo);
+
+                // Title
+                doc.setFontSize(20);
+                doc.text('Relatorio Terapeutico Semanal', 20, 20);
+
+                doc.setFontSize(12);
+                doc.text(`Periodo: ${sevenDaysAgo.toLocaleDateString('pt-BR')} a ${today.toLocaleDateString('pt-BR')}`, 20, 30);
+
+                // Mood summary
+                let y = 45;
+                doc.setFontSize(14);
+                doc.text('Resumo de Humor', 20, y);
+                y += 10;
+
+                if (weekMoods.length > 0) {
+                    const avgMood = (weekMoods.reduce((sum, m) => sum + m.value, 0) / weekMoods.length).toFixed(1);
+                    doc.setFontSize(11);
+                    doc.text(`- Total de registros: ${weekMoods.length}`, 25, y);
+                    y += 7;
+                    doc.text(`- Humor medio: ${avgMood}/5`, 25, y);
+                    y += 7;
+                } else {
+                    doc.setFontSize(11);
+                    doc.text('Nenhum registro de humor neste periodo', 25, y);
+                    y += 7;
+                }
+
+                // Emotions summary
+                y += 5;
+                doc.setFontSize(14);
+                doc.text('Emocoes Registradas', 20, y);
+                y += 10;
+
+                if (weekEmotions.length > 0) {
+                    const emotionCounts = {};
+                    weekEmotions.forEach(e => {
+                        emotionCounts[e.type] = (emotionCounts[e.type] || 0) + 1;
+                    });
+
+                    doc.setFontSize(11);
+                    doc.text(`- Total de registros: ${weekEmotions.length}`, 25, y);
+                    y += 7;
+
+                    const topEmotions = Object.entries(emotionCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+                    doc.text('- Emocoes mais frequentes:', 25, y);
+                    y += 7;
+
+                    topEmotions.forEach(([emotion, count]) => {
+                        doc.text(`  ${emotion}: ${count}x`, 30, y);
+                        y += 6;
+                    });
+                } else {
+                    doc.setFontSize(11);
+                    doc.text('Nenhuma emocao registrada neste periodo', 25, y);
+                    y += 7;
+                }
+
+                // Practices summary
+                y += 5;
+                doc.setFontSize(14);
+                doc.text('Praticas de Mindfulness', 20, y);
+                y += 10;
+
+                if (weekPractices.length > 0) {
+                    const totalMinutes = weekPractices.reduce((sum, p) => sum + parseInt(p.duration), 0);
+                    doc.setFontSize(11);
+                    doc.text(`- Total de praticas: ${weekPractices.length}`, 25, y);
+                    y += 7;
+                    doc.text(`- Tempo total: ${totalMinutes} minutos (${(totalMinutes / 60).toFixed(1)}h)`, 25, y);
+                    y += 7;
+                } else {
+                    doc.setFontSize(11);
+                    doc.text('Nenhuma pratica registrada neste periodo', 25, y);
+                    y += 7;
+                }
+
+                // Sessions
+                if (sessions.length > 0) {
+                    y += 5;
+                    doc.setFontSize(14);
+                    doc.text('Ultima Sessao Terapeutica', 20, y);
+                    y += 10;
+
+                    const lastSession = sessions[sessions.length - 1];
+                    doc.setFontSize(11);
+                    doc.text(`Data: ${new Date(lastSession.date).toLocaleDateString('pt-BR')}`, 25, y);
+                    y += 7;
+
+                    if (lastSession.summary) {
+                        doc.text('Resumo:', 25, y);
+                        y += 7;
+                        const summaryLines = doc.splitTextToSize(lastSession.summary, 160);
+                        doc.text(summaryLines, 30, y);
+                        y += (summaryLines.length * 6);
+                    }
+                }
+
+                // Footer
+                doc.setFontSize(9);
+                doc.text(`Gerado em ${new Date().toLocaleString('pt-BR')}`, 20, 280);
+
+                // Save PDF
+                doc.save(`relatorio-terapeutico-${today.toISOString().split('T')[0]}.pdf`);
+
+                showNotification('Relatório PDF gerado com sucesso!', 'success');
+            } catch (error) {
+                console.error('Erro ao gerar PDF:', error);
+                showNotification('Erro ao gerar PDF: ' + error.message, 'error');
             }
         }
 

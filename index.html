@@ -4,6 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Espaço Terapêutico - DBT v2</title>
+
+    <!-- Google Analytics 4 -->
+    <!-- INSTRUÇÃO: Substitua 'G-XXXXXXXXXX' pelo seu ID real do Google Analytics 4 -->
+    <!-- Para criar: https://analytics.google.com → Admin → Create Property → Data Streams -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        // Configuração básica do GA4
+        gtag('config', 'G-XXXXXXXXXX', {
+            'cookie_flags': 'SameSite=None;Secure', // LGPD compliance
+            'anonymize_ip': true // Anonimizar IPs para privacidade
+        });
+
+        // Helper function para trackear eventos customizados
+        window.trackEvent = function(eventName, properties = {}) {
+            if (typeof gtag !== 'undefined') {
+                gtag('event', eventName, properties);
+                console.log('📊 Analytics Event:', eventName, properties);
+            }
+        };
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
@@ -538,6 +563,150 @@
             transform: translateY(-2px);
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
         }
+
+        /* ============================================================================
+           ONBOARDING MODAL STYLES
+           ============================================================================ */
+
+        .onboarding-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95));
+            z-index: 9999;
+            backdrop-filter: blur(10px);
+        }
+
+        .onboarding-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.5s;
+        }
+
+        .onboarding-container {
+            background: white;
+            border-radius: 25px;
+            padding: 50px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .dark-mode .onboarding-container {
+            background: var(--card-dark);
+            color: var(--text-dark);
+        }
+
+        .onboarding-progress {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            gap: 10px;
+        }
+
+        .progress-step {
+            flex: 1;
+            height: 6px;
+            background: rgba(107, 91, 149, 0.2);
+            border-radius: 3px;
+            transition: all 0.3s;
+        }
+
+        .progress-step.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        .onboarding-step {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .onboarding-step.active {
+            display: block;
+        }
+
+        .onboarding-title {
+            font-size: 32px;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+
+        .onboarding-description {
+            font-size: 16px;
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .dark-mode .onboarding-description {
+            color: #ccc;
+        }
+
+        .onboarding-content {
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 0;
+        }
+
+        .onboarding-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .onboarding-controls .btn {
+            flex: 1;
+            max-width: 180px;
+        }
+
+        .btn-skip {
+            background: transparent;
+            color: #999;
+            border: 2px solid #999;
+        }
+
+        .btn-skip:hover {
+            background: #999;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .onboarding-container {
+                padding: 30px 20px;
+                width: 95%;
+            }
+
+            .onboarding-title {
+                font-size: 24px;
+            }
+
+            .onboarding-description {
+                font-size: 14px;
+            }
+
+            .onboarding-controls {
+                flex-direction: column;
+            }
+
+            .onboarding-controls .btn {
+                max-width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -655,15 +824,77 @@
                     <canvas id="moodChart" style="max-height: 350px;"></canvas>
                 </div>
 
-                <!-- Empty State Placeholder -->
-                <div class="dashboard-card" id="emptyStatePlaceholder" style="margin-top: 20px; text-align: center; padding: 40px;">
-                    <h3 style="margin-bottom: 15px;">🌱 Comece sua jornada</h3>
-                    <p style="color: #666; margin-bottom: 20px;">
-                        Registre seu humor algumas vezes para ver gráficos e tendências aparecerem aqui.
+                <!-- Empty State Placeholder (Enhanced - TASK-009) -->
+                <div class="dashboard-card" id="emptyStatePlaceholder" style="margin-top: 20px; text-align: center; padding: 50px 20px; display: none;">
+                    <!-- Illustration SVG -->
+                    <div style="margin-bottom: 25px;">
+                        <svg width="200" height="150" viewBox="0 0 200 150" style="margin: 0 auto;">
+                            <!-- Simple meditation person illustration -->
+                            <circle cx="100" cy="50" r="25" fill="var(--primary)" opacity="0.3"/>
+                            <ellipse cx="100" cy="100" rx="40" ry="30" fill="var(--secondary)" opacity="0.2"/>
+                            <path d="M70 90 Q100 80 130 90" stroke="var(--primary)" stroke-width="3" fill="none"/>
+                            <text x="100" y="140" text-anchor="middle" font-size="40" fill="var(--accent)">🧘</text>
+                        </svg>
+                    </div>
+
+                    <h3 style="margin-bottom: 15px; font-size: 24px; color: var(--primary);">
+                        Sua jornada começa aqui! 🌱
+                    </h3>
+                    <p style="color: #666; margin-bottom: 30px; line-height: 1.6;">
+                        Registre seu primeiro humor acima para começar a acompanhar<br>sua jornada de auto-conhecimento e regulação emocional.
                     </p>
-                    <p style="color: #999; font-size: 14px;">
-                        💡 Dica: Tente registrar seu humor pelo menos 3 vezes esta semana
+
+                    <!-- Próximos Passos Card -->
+                    <div style="background: linear-gradient(135deg, rgba(107, 91, 149, 0.1), rgba(136, 176, 211, 0.1)); padding: 25px; border-radius: 15px; max-width: 500px; margin: 0 auto; text-align: left;">
+                        <h4 style="margin-bottom: 15px; text-align: center; color: var(--primary);">
+                            📝 Próximos Passos
+                        </h4>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <a href="javascript:void(0)" onclick="document.querySelector('.mood-emoji').scrollIntoView({behavior: 'smooth', block: 'center'})" style="display: flex; align-items: center; gap: 10px; padding: 12px; background: white; border-radius: 8px; text-decoration: none; color: inherit; transition: all 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateX(5px)'" onmouseout="this.style.transform='translateX(0)'">
+                                <span style="font-size: 24px;">✅</span>
+                                <div>
+                                    <strong style="display: block; margin-bottom: 3px;">Registrar humor</strong>
+                                    <small style="color: #666;">Comece clicando em um emoji acima</small>
+                                </div>
+                            </a>
+                            <a href="javascript:void(0)" onclick="switchTab('skills', document.querySelector('[data-tab=skills]'))" style="display: flex; align-items: center; gap: 10px; padding: 12px; background: white; border-radius: 8px; text-decoration: none; color: inherit; transition: all 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateX(5px)'" onmouseout="this.style.transform='translateX(0)'">
+                                <span style="font-size: 24px;">📚</span>
+                                <div>
+                                    <strong style="display: block; margin-bottom: 3px;">Explorar habilidades DBT</strong>
+                                    <small style="color: #666;">Aprenda técnicas de regulação emocional</small>
+                                </div>
+                            </a>
+                            <a href="javascript:void(0)" onclick="switchTab('configuracoes', document.querySelector('[data-tab=configuracoes]'))" style="display: flex; align-items: center; gap: 10px; padding: 12px; background: white; border-radius: 8px; text-decoration: none; color: inherit; transition: all 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateX(5px)'" onmouseout="this.style.transform='translateX(0)'">
+                                <span style="font-size: 24px;">⏰</span>
+                                <div>
+                                    <strong style="display: block; margin-bottom: 3px;">Configurar lembrete</strong>
+                                    <small style="color: #666;">Mantenha sua prática consistente</small>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress State (< 7 registros) -->
+                <div class="dashboard-card" id="progressState" style="margin-top: 20px; text-align: center; padding: 30px; background: linear-gradient(135deg, rgba(130, 202, 157, 0.1), rgba(136, 176, 211, 0.1)); border-left: 4px solid var(--success); display: none;">
+                    <h3 style="margin-bottom: 10px; color: var(--success);">
+                        🎯 Você está no caminho certo!
+                    </h3>
+                    <p style="font-size: 18px; margin-bottom: 15px; color: #555;" id="progressText">
+                        Você tem <strong id="recordCount">0</strong> registros. Continue assim!
                     </p>
+                    <div style="background: white; padding: 15px; border-radius: 10px; max-width: 400px; margin: 0 auto;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px;">
+                            <span>Progresso:</span>
+                            <span><strong id="progressPercentage">0%</strong> para insights completos</span>
+                        </div>
+                        <div style="background: #e0e0e0; height: 10px; border-radius: 5px; overflow: hidden;">
+                            <div id="progressBar" style="background: linear-gradient(90deg, var(--primary), var(--success)); height: 100%; width: 0%; transition: width 0.5s;"></div>
+                        </div>
+                        <p style="margin-top: 10px; font-size: 13px; color: #888;">
+                            💡 7 registros necessários para insights personalizados
+                        </p>
+                    </div>
                 </div>
 
                 <!-- Top 3 Emotions (Will be implemented in A1) -->
@@ -972,6 +1203,138 @@
             <div style="display: flex; gap: 10px; margin-top: 20px;">
                 <button class="btn btn-success" style="flex: 1;" onclick="saveRoutineConfig()">Salvar Configuração</button>
                 <button class="btn" style="flex: 1; background: #999;" onclick="resetToDefaultRoutine()">Restaurar Padrão</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================================
+         ONBOARDING MODAL
+         ============================================================================ -->
+
+    <div class="onboarding-overlay" id="onboardingModal">
+        <div class="onboarding-container">
+            <!-- Progress Bar -->
+            <div class="onboarding-progress">
+                <div class="progress-step active" id="progress1"></div>
+                <div class="progress-step" id="progress2"></div>
+                <div class="progress-step" id="progress3"></div>
+            </div>
+
+            <!-- Step 1: Primeiro Registro de Humor -->
+            <div class="onboarding-step active" id="step1">
+                <h2 class="onboarding-title">Bem-vindo(a)! 🌱</h2>
+                <p class="onboarding-description">
+                    Vamos começar sua jornada de auto-conhecimento.<br>
+                    Como você está se sentindo agora?
+                </p>
+                <div class="onboarding-content">
+                    <div class="mood-scale">
+                        <span class="mood-emoji" onclick="selectOnboardingMood(1)" title="Muito mal">😔</span>
+                        <span class="mood-emoji" onclick="selectOnboardingMood(2)" title="Mal">😕</span>
+                        <span class="mood-emoji" onclick="selectOnboardingMood(3)" title="Neutro">😐</span>
+                        <span class="mood-emoji" onclick="selectOnboardingMood(4)" title="Bem">🙂</span>
+                        <span class="mood-emoji" onclick="selectOnboardingMood(5)" title="Muito bem">😊</span>
+                    </div>
+                    <div style="margin-top: 20px; text-align: center; color: #999;" id="moodFeedback">
+                        Selecione um emoji acima
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Preview de Habilidades DBT -->
+            <div class="onboarding-step" id="step2">
+                <h2 class="onboarding-title">Conheça as Habilidades DBT 🛠️</h2>
+                <p class="onboarding-description">
+                    Você terá acesso a técnicas poderosas de regulação emocional<br>
+                    baseadas em Terapia Comportamental Dialética.
+                </p>
+                <div class="onboarding-content">
+                    <div style="background: linear-gradient(135deg, #f5f7fa, #c3cfe2); padding: 30px; border-radius: 15px; max-width: 400px; text-align: left;">
+                        <h3 style="margin-bottom: 15px; color: var(--primary);">💆 Técnica TIPP</h3>
+                        <p style="line-height: 1.6; color: #555;">
+                            <strong>T</strong>emperatura - Mude a temperatura do rosto<br>
+                            <strong>I</strong>ntense exercise - Exercício intenso<br>
+                            <strong>P</strong>aced breathing - Respiração compassada<br>
+                            <strong>P</strong>aired muscle relaxation - Relaxamento muscular
+                        </p>
+                        <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.8); border-radius: 8px; font-size: 14px;">
+                            ✨ Ideal para momentos de crise emocional intensa
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Configuração de Lembrete -->
+            <div class="onboarding-step" id="step3">
+                <h2 class="onboarding-title">Mantenha-se Consistente ⏰</h2>
+                <p class="onboarding-description">
+                    Receba um lembrete diário para registrar seu humor<br>
+                    e manter sua prática em dia.
+                </p>
+                <div class="onboarding-content">
+                    <div style="width: 100%; max-width: 400px;">
+                        <div class="form-group">
+                            <label>📧 Email (opcional)</label>
+                            <input type="email" id="onboardingEmail" placeholder="seu@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label>🕐 Horário do lembrete</label>
+                            <select id="onboardingReminderTime">
+                                <option value="">Não quero lembretes</option>
+                                <option value="08:00">08:00 - Manhã</option>
+                                <option value="12:00">12:00 - Meio-dia</option>
+                                <option value="18:00">18:00 - Tarde</option>
+                                <option value="20:00" selected>20:00 - Noite</option>
+                            </select>
+                        </div>
+                        <div style="text-align: center; margin-top: 20px; font-size: 14px; color: #888;">
+                            💡 Você pode alterar isso depois nas Configurações
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="onboarding-controls">
+                <button class="btn btn-skip" onclick="skipOnboarding()">Pular Tutorial</button>
+                <button class="btn" id="btnPrev" onclick="prevStep()" style="display: none;">← Anterior</button>
+                <button class="btn" id="btnNext" onclick="nextStep()" disabled>Próximo →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================================
+         BACKUP REMINDER MODAL (TASK-015)
+         ============================================================================ -->
+
+    <div class="modal" id="backupReminderModal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 style="color: var(--danger);">⚠️ Faça Backup dos Seus Dados</h2>
+                <span class="close-modal" onclick="closeBackupReminderModal()">&times;</span>
+            </div>
+            <div style="margin: 20px 0;">
+                <p style="line-height: 1.8; margin-bottom: 15px;">
+                    Você não faz backup há <strong id="daysSinceBackup">7+</strong> dias.
+                </p>
+                <div style="background: rgba(246, 114, 128, 0.1); padding: 15px; border-radius: 10px; border-left: 4px solid var(--danger); margin-bottom: 20px;">
+                    <p style="font-size: 14px; margin-bottom: 8px;">
+                        <strong>Por que fazer backup?</strong>
+                    </p>
+                    <ul style="font-size: 14px; line-height: 1.6; margin-left: 20px;">
+                        <li>Seus dados ficam apenas no navegador (localStorage)</li>
+                        <li>Se limpar o cache, perderá tudo</li>
+                        <li>Se usar outro dispositivo, não verá os dados</li>
+                    </ul>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-success" style="flex: 2;" onclick="exportBackupFromModal()">
+                    📥 Exportar Backup (JSON)
+                </button>
+                <button class="btn" style="flex: 1; background: #999;" onclick="remindBackupLater()">
+                    Lembrar Depois
+                </button>
             </div>
         </div>
     </div>
@@ -1427,16 +1790,37 @@
                     weekMoodChangeEl.textContent = 'Registre pelo menos 3 humores';
                 }
 
-                // Show/hide visualizations based on data availability (C3)
+                // Show/hide visualizations based on data availability (C3 + TASK-009)
                 const moodChartCard = document.getElementById('moodChartCard');
                 const emptyStatePlaceholder = document.getElementById('emptyStatePlaceholder');
+                const progressState = document.getElementById('progressState');
 
-                if (weekMoods.length >= 3) {
-                    moodChartCard.style.display = 'block';
-                    emptyStatePlaceholder.style.display = 'none';
-                } else {
+                // TASK-009: Enhanced empty states
+                if (moods.length === 0) {
+                    // Truly empty - never registered
                     moodChartCard.style.display = 'none';
                     emptyStatePlaceholder.style.display = 'block';
+                    progressState.style.display = 'none';
+                } else if (moods.length < 7) {
+                    // Has some data but not enough for full insights
+                    moodChartCard.style.display = 'none';
+                    emptyStatePlaceholder.style.display = 'none';
+                    progressState.style.display = 'block';
+
+                    // Update progress state UI
+                    document.getElementById('recordCount').textContent = moods.length;
+                    const percentage = Math.round((moods.length / 7) * 100);
+                    document.getElementById('progressPercentage').textContent = `${percentage}%`;
+                    document.getElementById('progressBar').style.width = `${percentage}%`;
+                } else {
+                    // Enough data - show full visualizations
+                    if (weekMoods.length >= 3) {
+                        moodChartCard.style.display = 'block';
+                    } else {
+                        moodChartCard.style.display = 'none';
+                    }
+                    emptyStatePlaceholder.style.display = 'none';
+                    progressState.style.display = 'none';
                 }
 
                 // Top 3 Emotions (A1)
@@ -1614,6 +1998,13 @@
 
                 insightCard.style.borderLeftColor = colors[insight.type];
                 insightText.textContent = `${insight.emoji} ${insight.text}`;
+
+                // Analytics tracking - insight visualizado
+                trackEvent('visualizacao_insight', {
+                    tipo_insight: insight.type,
+                    emoji: insight.emoji,
+                    timestamp: new Date().toISOString()
+                });
             },
 
             async updateBackupBadge() {
@@ -2023,6 +2414,13 @@
             try {
                 await App.store.save('moods', mood);
 
+                // Analytics tracking
+                trackEvent('registro_humor', {
+                    valor_humor: value,
+                    tipo_registro: 'quick',
+                    timestamp: new Date().toISOString()
+                });
+
                 // Visual feedback
                 const emojis = ['', '😔', '😕', '😐', '🙂', '😊'];
                 showNotification(`Humor registrado! ${emojis[value]}`, 'success');
@@ -2059,6 +2457,15 @@
 
             try {
                 await App.store.save('moods', mood);
+
+                // Analytics tracking
+                trackEvent('registro_humor', {
+                    valor_humor: App.currentMood,
+                    tipo_registro: 'detailed',
+                    com_nota: note.length > 0,
+                    timestamp: new Date().toISOString()
+                });
+
                 showNotification('Humor registrado com sucesso! 🎉', 'success');
 
                 // Clear form
@@ -2136,6 +2543,15 @@
 
             try {
                 await App.store.save('practices', practice);
+
+                // Analytics tracking
+                trackEvent('pratica_mindfulness', {
+                    tipo_pratica: type,
+                    duracao_minutos: parseInt(duration),
+                    com_notas: notes.length > 0,
+                    timestamp: new Date().toISOString()
+                });
+
                 showNotification('Prática registrada com sucesso! 🎉', 'success');
 
                 // Clear form
@@ -2660,6 +3076,15 @@
                 // Save PDF
                 doc.save(`relatorio-terapeutico-${today.toISOString().split('T')[0]}.pdf`);
 
+                // Analytics tracking
+                trackEvent('exportacao_pdf', {
+                    periodo_selecionado: '7_dias',
+                    total_registros_humor: weekMoods.length,
+                    total_emocoes: weekEmotions.length,
+                    total_praticas: weekPractices.length,
+                    timestamp: new Date().toISOString()
+                });
+
                 showNotification('Relatório PDF gerado com sucesso!', 'success');
             } catch (error) {
                 console.error('Erro ao gerar PDF:', error);
@@ -2712,10 +3137,40 @@
             }
         }
 
+        // TASK-015: Enhanced backup reminder modal
         function showBackupModal() {
-            if (confirm('Deseja fazer backup agora?')) {
-                exportBackup();
-            }
+            const modal = document.getElementById('backupReminderModal');
+            modal.classList.add('active');
+
+            // Calculate days since last backup
+            App.store.getMetadata('lastBackup').then(lastBackup => {
+                const daysSinceEl = document.getElementById('daysSinceBackup');
+                if (!lastBackup) {
+                    daysSinceEl.textContent = 'nunca';
+                } else {
+                    const days = Math.floor((Date.now() - new Date(lastBackup)) / (1000 * 60 * 60 * 24));
+                    daysSinceEl.textContent = `${days} ${days === 1 ? 'dia' : 'dias'}`;
+                }
+            });
+        }
+
+        function closeBackupReminderModal() {
+            document.getElementById('backupReminderModal').classList.remove('active');
+        }
+
+        function exportBackupFromModal() {
+            exportBackup();
+            closeBackupReminderModal();
+        }
+
+        function remindBackupLater() {
+            // Snooze for 1 day
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            localStorage.setItem('backupSnoozeUntil', tomorrow.toISOString());
+
+            showNotification('Ok! Lembrarei você amanhã', 'success');
+            closeBackupReminderModal();
         }
 
         function showNotification(message, type = 'success') {
@@ -2774,9 +3229,180 @@
             }
         });
 
+        // ============================================================================
+        // ONBOARDING SYSTEM
+        // ============================================================================
+
+        let currentOnboardingStep = 1;
+        let selectedOnboardingMood = null;
+
+        function showOnboarding() {
+            const onboardingCompleted = localStorage.getItem('onboardingCompleted');
+            if (!onboardingCompleted) {
+                document.getElementById('onboardingModal').classList.add('active');
+                trackEvent('onboarding_iniciado', {
+                    timestamp: new Date().toISOString()
+                });
+            }
+        }
+
+        function selectOnboardingMood(value) {
+            selectedOnboardingMood = value;
+
+            // Visual feedback - highlight selected
+            document.querySelectorAll('#step1 .mood-emoji').forEach(emoji => {
+                emoji.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+
+            // Update feedback text
+            const emojis = ['', '😔 Entendi...', '😕 Vamos melhorar!', '😐 Certo!', '🙂 Que bom!', '😊 Ótimo!'];
+            document.getElementById('moodFeedback').textContent = emojis[value];
+            document.getElementById('moodFeedback').style.color = value >= 4 ? 'var(--success)' : 'var(--primary)';
+
+            // Enable next button
+            document.getElementById('btnNext').disabled = false;
+        }
+
+        function nextStep() {
+            // Step 1 -> Step 2
+            if (currentOnboardingStep === 1) {
+                if (!selectedOnboardingMood) {
+                    showNotification('Por favor, selecione seu humor!', 'error');
+                    return;
+                }
+
+                // Save first mood
+                const mood = Schema.Mood.create(selectedOnboardingMood, 'Primeiro registro (onboarding)');
+                App.store.save('moods', mood).then(() => {
+                    trackEvent('onboarding_step_1_completo', {
+                        humor_selecionado: selectedOnboardingMood,
+                        timestamp: new Date().toISOString()
+                    });
+                });
+
+                currentOnboardingStep = 2;
+                updateOnboardingUI();
+            }
+            // Step 2 -> Step 3
+            else if (currentOnboardingStep === 2) {
+                trackEvent('onboarding_step_2_visualizado', {
+                    timestamp: new Date().toISOString()
+                });
+                currentOnboardingStep = 3;
+                updateOnboardingUI();
+            }
+            // Step 3 -> Finish
+            else if (currentOnboardingStep === 3) {
+                finishOnboarding();
+            }
+        }
+
+        function prevStep() {
+            if (currentOnboardingStep > 1) {
+                currentOnboardingStep--;
+                updateOnboardingUI();
+            }
+        }
+
+        function updateOnboardingUI() {
+            // Hide all steps
+            document.querySelectorAll('.onboarding-step').forEach(step => {
+                step.classList.remove('active');
+            });
+
+            // Show current step
+            document.getElementById(`step${currentOnboardingStep}`).classList.add('active');
+
+            // Update progress bar
+            for (let i = 1; i <= 3; i++) {
+                const progressStep = document.getElementById(`progress${i}`);
+                if (i <= currentOnboardingStep) {
+                    progressStep.classList.add('active');
+                } else {
+                    progressStep.classList.remove('active');
+                }
+            }
+
+            // Update buttons
+            const btnPrev = document.getElementById('btnPrev');
+            const btnNext = document.getElementById('btnNext');
+
+            // Show/hide previous button
+            btnPrev.style.display = currentOnboardingStep > 1 ? 'block' : 'none';
+
+            // Update next button text and state
+            if (currentOnboardingStep === 1) {
+                btnNext.textContent = 'Próximo →';
+                btnNext.disabled = !selectedOnboardingMood;
+            } else if (currentOnboardingStep === 2) {
+                btnNext.textContent = 'Próximo →';
+                btnNext.disabled = false;
+            } else if (currentOnboardingStep === 3) {
+                btnNext.textContent = 'Finalizar 🎉';
+                btnNext.disabled = false;
+            }
+        }
+
+        function finishOnboarding() {
+            // Save reminder preferences
+            const email = document.getElementById('onboardingEmail').value;
+            const reminderTime = document.getElementById('onboardingReminderTime').value;
+
+            if (email || reminderTime) {
+                localStorage.setItem('reminderEmail', email);
+                localStorage.setItem('reminderTime', reminderTime);
+
+                trackEvent('ativacao_lembrete', {
+                    horario_escolhido: reminderTime,
+                    email_fornecido: email.length > 0,
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            // Mark onboarding as completed
+            localStorage.setItem('onboardingCompleted', 'true');
+
+            // Track completion
+            trackEvent('conclusao_onboarding', {
+                etapa_final: 3,
+                tempo_total: 0, // TODO: track actual time
+                pulou: false,
+                timestamp: new Date().toISOString()
+            });
+
+            // Close modal with animation
+            document.getElementById('onboardingModal').classList.remove('active');
+
+            // Show success notification
+            showNotification('Bem-vindo(a)! Sua jornada começou! 🎉', 'success');
+
+            // Refresh dashboard
+            App.updateDashboard();
+        }
+
+        function skipOnboarding() {
+            if (confirm('Tem certeza que deseja pular o tutorial? Você pode acessá-lo depois nas Configurações.')) {
+                localStorage.setItem('onboardingCompleted', 'true');
+
+                trackEvent('onboarding_pulado', {
+                    etapa_atual: currentOnboardingStep,
+                    timestamp: new Date().toISOString()
+                });
+
+                document.getElementById('onboardingModal').classList.remove('active');
+                showNotification('Você pode refazer o tutorial nas Configurações.', 'success');
+            }
+        }
+
         // Initialize app on load
         window.onload = () => {
             App.init();
+
+            // Show onboarding for new users after a slight delay
+            setTimeout(() => {
+                showOnboarding();
+            }, 500);
         };
     </script>
 </body>

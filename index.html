@@ -743,6 +743,9 @@
             <button class="nav-tab" data-tab="mindfulness" onclick="switchTab('mindfulness', this)">
                 <span>🧘</span> Mindfulness
             </button>
+            <button class="nav-tab" data-tab="foodCompulsion" onclick="switchTab('foodCompulsion', this)">
+                <span>🍽️</span> Compulsão Alimentar
+            </button>
             <button class="nav-tab" data-tab="skills" onclick="switchTab('skills', this)">
                 <span>🛠️</span> Habilidades
             </button>
@@ -1102,6 +1105,297 @@
                     <h3>Estatísticas de Mindfulness</h3>
                     <div id="practiceStats">Carregando...</div>
                 </div>
+            </div>
+
+            <!-- Food Compulsion Tab -->
+            <div id="foodCompulsion" class="tab-content">
+                <h2>🍽️ Diário Alimentar Emocional</h2>
+
+                <!-- Info Card -->
+                <div class="dashboard-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-bottom: 20px;">
+                    <h3 style="color: white;">📚 Sobre Compulsão Alimentar</h3>
+                    <p style="margin: 10px 0; line-height: 1.6;">
+                        A compulsão <strong>não é falta de vontade</strong>. É um comportamento mantido por reforços biológicos e emocionais.
+                        Este diário ajuda a mapear seu ciclo pessoal e trabalhar com técnicas DBT.
+                    </p>
+                </div>
+
+                <!-- Formulário de Registro -->
+                <div class="dashboard-card">
+                    <h3>Registrar Episódio</h3>
+
+                    <!-- ANTES DE COMER -->
+                    <div style="padding: 15px; background: #f0f7ff; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="color: #2563eb; margin-bottom: 15px;">1️⃣ Antes de Comer</h4>
+
+                        <div class="form-group">
+                            <label>Emoções presentes (selecione todas que sentiu) *</label>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
+                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                    <input type="checkbox" class="emotion-before" value="Ansiedade"> Ansiedade
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                    <input type="checkbox" class="emotion-before" value="Tristeza"> Tristeza
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                    <input type="checkbox" class="emotion-before" value="Estresse"> Estresse
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                    <input type="checkbox" class="emotion-before" value="Solidão"> Solidão
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                    <input type="checkbox" class="emotion-before" value="Medo"> Medo
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                    <input type="checkbox" class="emotion-before" value="Tédio"> Tédio
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                    <input type="checkbox" class="emotion-before" value="Raiva"> Raiva
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                    <input type="checkbox" class="emotion-before" value="Frustração"> Frustração
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Intensidade Emocional: <span id="intensityBeforeValue" style="font-weight: bold; color: #2563eb;">5/10</span></label>
+                            <input type="range" id="intensityBefore" min="0" max="10" value="5" style="width: 100%;"
+                                oninput="document.getElementById('intensityBeforeValue').textContent = this.value + '/10'">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Gatilho identificado</label>
+                            <textarea id="compulsionTrigger" rows="2" placeholder="O que aconteceu antes? Ex: briga, notícia ruim, situação estressante..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Sensações físicas</label>
+                            <textarea id="physicalSensations" rows="2" placeholder="Ex: aperto no peito, tremor, tensão muscular, vontade de chorar..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- DURANTE O COMER -->
+                    <div style="padding: 15px; background: #fff7ed; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="color: #ea580c; margin-bottom: 15px;">2️⃣ Durante o Comer</h4>
+
+                        <div class="form-group">
+                            <label>Como você comeu?</label>
+                            <select id="eatingPace">
+                                <option value="">Selecione...</option>
+                                <option value="Muito rápido">Muito rápido (sem perceber)</option>
+                                <option value="Rápido">Rápido</option>
+                                <option value="Normal">Normal</option>
+                                <option value="Devagar">Devagar</option>
+                                <option value="Mindful">Com atenção plena</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Local</label>
+                            <select id="compulsionLocation">
+                                <option value="">Selecione...</option>
+                                <option value="Casa - Cozinha">Casa - Cozinha</option>
+                                <option value="Casa - Quarto">Casa - Quarto</option>
+                                <option value="Casa - Sala">Casa - Sala</option>
+                                <option value="Trabalho">Trabalho</option>
+                                <option value="Restaurante">Restaurante</option>
+                                <option value="Evento/Festa">Evento/Festa</option>
+                                <option value="Carro">Carro</option>
+                                <option value="Rua">Na rua</option>
+                                <option value="Outro">Outro</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Companhia</label>
+                            <select id="compulsionCompany">
+                                <option value="Sozinho">Sozinho</option>
+                                <option value="Família">Família</option>
+                                <option value="Amigos">Amigos</option>
+                                <option value="Colegas">Colegas de trabalho</option>
+                                <option value="Parceiro">Parceiro(a)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Estava fazendo outra coisa enquanto comia?</label>
+                            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="distraction" value="TV"> Assistindo TV
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="distraction" value="Celular"> Mexendo no celular
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="distraction" value="Trabalho"> Trabalhando
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="distraction" value="Conversa"> Conversando
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="distraction" value="Nada"> Apenas comendo
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DEPOIS DE COMER -->
+                    <div style="padding: 15px; background: #fef2f2; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="color: #dc2626; margin-bottom: 15px;">3️⃣ Depois de Comer</h4>
+
+                        <div class="form-group">
+                            <label>O que você comeu?</label>
+                            <textarea id="foodEaten" rows="3" placeholder="Liste os alimentos e quantidades aproximadas..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Tipo de alimentos</label>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="food-type" value="Doces"> Doces
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="food-type" value="Salgados"> Salgados processados
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="food-type" value="Fast food"> Fast food
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="food-type" value="Bebidas açucaradas"> Bebidas açucaradas
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="food-type" value="Frutas"> Frutas
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="food-type" value="Vegetais"> Vegetais
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="food-type" value="Proteínas"> Proteínas
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="food-type" value="Carboidratos"> Carboidratos
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Emoções após comer</label>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="emotion-after" value="Culpa"> Culpa
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="emotion-after" value="Vergonha"> Vergonha
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="emotion-after" value="Alívio"> Alívio temporário
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="emotion-after" value="Arrependimento"> Arrependimento
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="emotion-after" value="Satisfação"> Satisfação
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="emotion-after" value="Desconforto físico"> Desconforto físico
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="emotion-after" value="Neutr"> Sem emoção forte
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Intensidade Emocional após: <span id="intensityAfterValue" style="font-weight: bold; color: #dc2626;">5/10</span></label>
+                            <input type="range" id="intensityAfter" min="0" max="10" value="5" style="width: 100%;"
+                                oninput="document.getElementById('intensityAfterValue').textContent = this.value + '/10'">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Pensamentos após comer</label>
+                            <textarea id="thoughtsAfter" rows="2" placeholder="O que passou pela sua cabeça? Ex: 'Não tenho controle', 'Sou fraco', 'Amanhã vou compensar'..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Comportamentos compensatórios? (Se houver)</label>
+                            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="compensatory" value="Exercício excessivo"> Planejou exercício excessivo
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="compensatory" value="Restrição"> Planejou restrição alimentar
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="compensatory" value="Purgação"> Vômito ou laxantes
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" class="compensatory" value="Nenhum"> Nenhum
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TÉCNICAS USADAS -->
+                    <div style="padding: 15px; background: #f0fdf4; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="color: #16a34a; margin-bottom: 15px;">4️⃣ Tentou usar alguma técnica antes de comer?</h4>
+
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" id="usedTechnique" onchange="document.getElementById('techniquesSection').style.display = this.checked ? 'block' : 'none'">
+                                <span>Sim, tentei usar técnicas de regulação</span>
+                            </label>
+                        </div>
+
+                        <div id="techniquesSection" style="display: none; margin-top: 15px;">
+                            <div class="form-group">
+                                <label>Quais técnicas?</label>
+                                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                                    <label style="display: flex; align-items: center; gap: 5px;">
+                                        <input type="checkbox" class="technique" value="TIPP"> TIPP
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 5px;">
+                                        <input type="checkbox" class="technique" value="ACCEPTS"> ACCEPTS
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 5px;">
+                                        <input type="checkbox" class="technique" value="Respiração"> Respiração diafragmática
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 5px;">
+                                        <input type="checkbox" class="technique" value="Grounding"> Grounding
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 5px;">
+                                        <input type="checkbox" class="technique" value="RPD"> Registro de Pensamentos
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 5px;">
+                                        <input type="checkbox" class="technique" value="Distração"> Distração saudável
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 5px;">
+                                        <input type="checkbox" class="technique" value="Outra"> Outra
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>A técnica ajudou?</label>
+                                <select id="techniqueEffectiveness">
+                                    <option value="">Selecione...</option>
+                                    <option value="Não ajudou">Não ajudou (comeu da mesma forma)</option>
+                                    <option value="Ajudou pouco">Ajudou pouco (comeu menos)</option>
+                                    <option value="Ajudou moderadamente">Ajudou moderadamente (evitou parte da compulsão)</option>
+                                    <option value="Ajudou muito">Ajudou muito (evitou completamente)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" style="width: 100%; padding: 15px; font-size: 16px;" onclick="saveFoodCompulsionEntry()">
+                        💾 Salvar Registro
+                    </button>
+                </div>
+
+                <!-- HISTÓRICO -->
+                <h3 style="margin-top: 40px;">📜 Histórico de Episódios</h3>
+                <div id="compulsionHistory"></div>
             </div>
 
             <!-- Sessions Tab -->
@@ -2479,6 +2773,11 @@
             if (trigger) {
                 trigger.classList.add('active');
             }
+
+            // Load data when switching to specific tabs
+            if (tabName === 'foodCompulsion') {
+                loadCompulsionHistory();
+            }
         }
 
         function selectMood(value, element) {
@@ -2648,6 +2947,140 @@
             } catch (error) {
                 showNotification('Erro ao salvar: ' + error.message, 'error');
             }
+        }
+
+        // Helper function to get selected checkboxes
+        function getCheckedValues(className) {
+            return Array.from(document.querySelectorAll(`.${className}:checked`))
+                .map(cb => cb.value);
+        }
+
+        // Save food compulsion entry
+        async function saveFoodCompulsionEntry() {
+            // Collect data from form
+            const data = {
+                // Antes de comer
+                emotionsBefore: getCheckedValues('emotion-before'),
+                intensityBefore: document.getElementById('intensityBefore').value,
+                trigger: document.getElementById('compulsionTrigger').value,
+                physicalSensations: document.getElementById('physicalSensations').value,
+                // Durante
+                eatingPace: document.getElementById('eatingPace').value,
+                location: document.getElementById('compulsionLocation').value,
+                company: document.getElementById('compulsionCompany').value,
+                distractions: getCheckedValues('distraction'),
+                // Depois
+                foodEaten: document.getElementById('foodEaten').value,
+                foodTypes: getCheckedValues('food-type'),
+                emotionsAfter: getCheckedValues('emotion-after'),
+                intensityAfter: document.getElementById('intensityAfter').value,
+                thoughtsAfter: document.getElementById('thoughtsAfter').value,
+                compensatoryBehaviors: getCheckedValues('compensatory'),
+                // Técnicas
+                usedTechnique: document.getElementById('usedTechnique').checked,
+                techniques: document.getElementById('usedTechnique').checked ? getCheckedValues('technique') : [],
+                techniqueEffectiveness: document.getElementById('usedTechnique').checked ?
+                    document.getElementById('techniqueEffectiveness').value : ''
+            };
+
+            // Create entry
+            const entry = Schema.FoodCompulsion.create(data);
+
+            // Validate
+            const validation = Schema.FoodCompulsion.validate(entry);
+            if (!validation.valid) {
+                showNotification(validation.error, 'error');
+                return;
+            }
+
+            try {
+                await App.store.save('foodCompulsion', entry);
+
+                // Analytics tracking
+                trackEvent('compulsao_registrada', {
+                    emocoes_antes: entry.emotionsBefore.length,
+                    intensidade_antes: entry.intensityBefore,
+                    usou_tecnica: entry.usedTechnique,
+                    tecnica_efetiva: entry.techniqueEffectiveness,
+                    timestamp: new Date().toISOString()
+                });
+
+                showNotification('Episódio registrado com sucesso! 💪', 'success');
+
+                // Clear form
+                document.querySelectorAll('.emotion-before').forEach(cb => cb.checked = false);
+                document.getElementById('intensityBefore').value = 5;
+                document.getElementById('intensityBeforeValue').textContent = '5/10';
+                document.getElementById('compulsionTrigger').value = '';
+                document.getElementById('physicalSensations').value = '';
+                document.getElementById('eatingPace').value = '';
+                document.getElementById('compulsionLocation').value = '';
+                document.getElementById('compulsionCompany').value = 'Sozinho';
+                document.querySelectorAll('.distraction').forEach(cb => cb.checked = false);
+                document.getElementById('foodEaten').value = '';
+                document.querySelectorAll('.food-type').forEach(cb => cb.checked = false);
+                document.querySelectorAll('.emotion-after').forEach(cb => cb.checked = false);
+                document.getElementById('intensityAfter').value = 5;
+                document.getElementById('intensityAfterValue').textContent = '5/10';
+                document.getElementById('thoughtsAfter').value = '';
+                document.querySelectorAll('.compensatory').forEach(cb => cb.checked = false);
+                document.getElementById('usedTechnique').checked = false;
+                document.getElementById('techniquesSection').style.display = 'none';
+                document.querySelectorAll('.technique').forEach(cb => cb.checked = false);
+                document.getElementById('techniqueEffectiveness').value = '';
+
+                // Reload history
+                await loadCompulsionHistory();
+            } catch (error) {
+                showNotification('Erro ao salvar: ' + error.message, 'error');
+            }
+        }
+
+        // Load compulsion history
+        async function loadCompulsionHistory() {
+            const entries = await App.store.getAll('foodCompulsion');
+            const historyDiv = document.getElementById('compulsionHistory');
+
+            if (entries.length === 0) {
+                historyDiv.innerHTML = '<p>Nenhum episódio registrado ainda.</p>';
+                return;
+            }
+
+            const recent = entries.slice(-10).reverse();
+            historyDiv.innerHTML = recent.map(e => `
+                <div class="dashboard-card" style="margin-bottom: 15px; border-left: 4px solid ${e.usedTechnique ? '#16a34a' : '#dc2626'};">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                        <strong style="color: #333;">Episódio de ${formatDateTime(e.timestamp)}</strong>
+                        ${e.usedTechnique ? '<span style="background: #16a34a; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px;">Usou técnica</span>' : ''}
+                    </div>
+
+                    <div style="margin-bottom: 10px;">
+                        <strong style="color: #2563eb;">Antes:</strong> ${e.emotionsBefore.join(', ')}
+                        <span style="color: #666;">(${e.intensityBefore}/10)</span>
+                        ${e.trigger ? `<br><span style="font-size: 13px; color: #666;">Gatilho: ${e.trigger}</span>` : ''}
+                    </div>
+
+                    ${e.foodEaten ? `
+                        <div style="margin-bottom: 10px;">
+                            <strong style="color: #ea580c;">Durante:</strong> ${e.eatingPace || 'Não especificado'} | ${e.location || 'Não especificado'}<br>
+                            <span style="font-size: 13px; color: #666;">Comeu: ${e.foodEaten}</span>
+                        </div>
+                    ` : ''}
+
+                    <div>
+                        <strong style="color: #dc2626;">Depois:</strong> ${e.emotionsAfter.join(', ') || 'Não especificado'}
+                        <span style="color: #666;">(${e.intensityAfter}/10)</span>
+                        ${e.thoughtsAfter ? `<br><span style="font-size: 13px; color: #666; font-style: italic;">"${e.thoughtsAfter}"</span>` : ''}
+                    </div>
+
+                    ${e.usedTechnique ? `
+                        <div style="margin-top: 10px; padding: 8px; background: #f0fdf4; border-radius: 4px;">
+                            <strong style="color: #16a34a; font-size: 13px;">Técnicas usadas:</strong> ${e.techniques.join(', ')}<br>
+                            <span style="font-size: 12px; color: #666;">Efetividade: ${e.techniqueEffectiveness}</span>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
         }
 
         async function saveSession() {

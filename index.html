@@ -1910,6 +1910,32 @@
                 }
             }
 
+            async delete(storeName, id) {
+                // Delete from localStorage
+                try {
+                    const key = `therapy_${storeName}`;
+                    let items = JSON.parse(localStorage.getItem(key) || '[]');
+                    items = items.filter(item => item.id !== id);
+                    localStorage.setItem(key, JSON.stringify(items));
+                } catch (error) {
+                    console.error('localStorage delete error:', error);
+                    throw new Error('Falha ao deletar em localStorage');
+                }
+
+                // Delete from IndexedDB (backup)
+                if (this.ready && this.db) {
+                    try {
+                        const transaction = this.db.transaction([storeName], 'readwrite');
+                        const store = transaction.objectStore(storeName);
+                        store.delete(id);
+                    } catch (error) {
+                        console.warn('IndexedDB delete warning:', error);
+                    }
+                }
+
+                return true;
+            }
+
             getAllFromIndexedDB(storeName) {
                 return new Promise((resolve, reject) => {
                     const transaction = this.db.transaction([storeName], 'readonly');
@@ -2154,6 +2180,9 @@
                                         <div style="font-size: 12px; color: #666;">${formatDateTime(m.timestamp)}</div>
                                         ${m.note ? `<div style="margin-top: 5px; font-size: 13px; color: #555; font-style: italic;">"${m.note}"</div>` : ''}
                                     </div>
+                                    <button onclick="deleteMood('${m.id}')" style="background: #f67280; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;" title="Deletar">
+                                        🗑️
+                                    </button>
                                 </div>
                             </div>
                         `;
@@ -2221,7 +2250,10 @@
 
                 const recent = emotions.slice(-10).reverse();
                 historyDiv.innerHTML = recent.map(e => `
-                    <div class="emotion-log">
+                    <div class="emotion-log" style="position: relative; padding-right: 50px;">
+                        <button onclick="deleteEmotion('${e.id}')" style="position: absolute; top: 10px; right: 10px; background: #f67280; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;" title="Deletar">
+                            🗑️
+                        </button>
                         <div class="note-date">${formatDateTime(e.timestamp)}</div>
                         <strong>${e.type} (Intensidade: ${e.intensity}/10)</strong>
                         ${e.trigger ? `<p><strong>Gatilho:</strong> ${e.trigger}</p>` : ''}
@@ -2670,7 +2702,10 @@
 
                 const recent = practices.slice(-10).reverse();
                 historyDiv.innerHTML = recent.map(p => `
-                    <div class="emotion-log" style="border-left-color: #82ca9d;">
+                    <div class="emotion-log" style="border-left-color: #82ca9d; position: relative; padding-right: 50px;">
+                        <button onclick="deletePractice('${p.id}')" style="position: absolute; top: 10px; right: 10px; background: #f67280; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;" title="Deletar">
+                            🗑️
+                        </button>
                         <div class="note-date">${formatDateTime(p.timestamp)}</div>
                         <strong>${p.type} - ${p.duration} minutos</strong>
                         ${p.notes ? `<p>${p.notes}</p>` : ''}
@@ -3048,8 +3083,11 @@
 
             const recent = entries.slice(-10).reverse();
             historyDiv.innerHTML = recent.map(e => `
-                <div class="dashboard-card" style="margin-bottom: 15px; border-left: 4px solid ${e.usedTechnique ? '#16a34a' : '#dc2626'};">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                <div class="dashboard-card" style="margin-bottom: 15px; border-left: 4px solid ${e.usedTechnique ? '#16a34a' : '#dc2626'}; position: relative;">
+                    <button onclick="deleteFoodCompulsion('${e.id}')" style="position: absolute; top: 10px; right: 10px; background: #f67280; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;" title="Deletar">
+                        🗑️
+                    </button>
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px; padding-right: 60px;">
                         <strong style="color: #333;">Episódio de ${formatDateTime(e.timestamp)}</strong>
                         ${e.usedTechnique ? '<span style="background: #16a34a; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px;">Usou técnica</span>' : ''}
                     </div>
@@ -3081,6 +3119,65 @@
                     ` : ''}
                 </div>
             `).join('');
+        }
+
+        // Delete functions with confirmation
+        async function deleteMood(id) {
+            if (!confirm('⚠️ Tem certeza que deseja deletar este registro de humor?\n\nEsta ação não pode ser desfeita.')) {
+                return;
+            }
+
+            try {
+                await App.store.delete('moods', id);
+                showNotification('Registro de humor deletado', 'success');
+                await App.updateDashboard();
+            } catch (error) {
+                showNotification('Erro ao deletar: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteEmotion(id) {
+            if (!confirm('⚠️ Tem certeza que deseja deletar este registro de emoção?\n\nEsta ação não pode ser desfeita.')) {
+                return;
+            }
+
+            try {
+                await App.store.delete('emotions', id);
+                showNotification('Registro de emoção deletado', 'success');
+                await App.loadEmotionHistory();
+                await App.updateDashboard();
+            } catch (error) {
+                showNotification('Erro ao deletar: ' + error.message, 'error');
+            }
+        }
+
+        async function deletePractice(id) {
+            if (!confirm('⚠️ Tem certeza que deseja deletar este registro de prática?\n\nEsta ação não pode ser desfeita.')) {
+                return;
+            }
+
+            try {
+                await App.store.delete('practices', id);
+                showNotification('Registro de prática deletado', 'success');
+                await App.loadPracticeHistory();
+                await App.updatePracticeStats();
+            } catch (error) {
+                showNotification('Erro ao deletar: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteFoodCompulsion(id) {
+            if (!confirm('⚠️ Tem certeza que deseja deletar este episódio de compulsão?\n\nEsta ação não pode ser desfeita.')) {
+                return;
+            }
+
+            try {
+                await App.store.delete('foodCompulsion', id);
+                showNotification('Episódio deletado', 'success');
+                await loadCompulsionHistory();
+            } catch (error) {
+                showNotification('Erro ao deletar: ' + error.message, 'error');
+            }
         }
 
         async function saveSession() {

@@ -22,9 +22,96 @@
 
 ---
 
+### 3. **NOVA DEMANDA: Módulo de Compulsão Alimentar** 🆕
+**Origem:** Sessão de terapia de 11/11/2025
+**Problema:** App não tem ferramenta para auto-monitoramento de compulsão alimentar, que é tarefa terapêutica ativa do usuário.
+
+**Necessidade:**
+- Diário alimentar emocional (antes/durante/depois de comer)
+- Mapeamento do ciclo pessoal de compulsão
+- Sugestão de técnicas de regulação baseadas em gatilhos
+- Análise de padrões e progressão
+
+**Impacto:** 🔴🔴🔴 **CRÍTICO** - Tarefa terapêutica ativa, demanda real e imediata
+
+**Documentação completa:** Ver `MODULO_COMPULSAO_ALIMENTAR.md`
+
+---
+
 ## 🎯 Melhorias Prioritárias
 
-### 🔴 Prioridade CRÍTICA (Implementar Primeiro)
+### 🔴 Prioridade MÁXIMA (Tarefa Terapêutica Ativa)
+
+#### M0: Módulo Completo de Compulsão Alimentar 🆕
+**Descrição:** Sistema completo para monitorar e trabalhar compulsão alimentar seguindo protocolo DBT da terapeuta.
+
+**Funcionalidades:**
+1. **Diário Alimentar Emocional:**
+   - Registro em 3 etapas (antes/durante/depois)
+   - Emoções, gatilhos, sensações físicas
+   - Local, companhia, tipo de alimentos
+   - Consequências emocionais e pensamentos
+   - Técnicas tentadas e efetividade
+
+2. **Visualização do Ciclo Pessoal:**
+   - Dashboard com estatísticas semanais
+   - Gatilhos mais frequentes
+   - Horários de maior risco
+   - Efetividade das técnicas usadas
+
+3. **Plano de Ação Anti-Compulsão:**
+   - Checklist rápido de emoções
+   - Sugestão de técnicas por intensidade
+   - Acesso rápido a TIPP/ACCEPTS/Respiração
+   - Alimentos estratégicos para saciedade
+
+4. **Insights Automáticos:**
+   - Padrões identificados
+   - Progressão ao longo do tempo
+   - Correlação com humor geral
+
+5. **Biblioteca Educacional:**
+   - Explicação do ciclo da compulsão
+   - Por que acontece (biologia + emoção)
+   - O que evitar (dietas restritivas)
+   - Como trabalhar gradualmente
+
+**Schema de Dados:**
+```javascript
+Schema.FoodCompulsionEntry {
+  id, timestamp, date,
+  // Antes
+  emotionsBefore[], intensityBefore, trigger, physicalSensations,
+  // Durante
+  eatingPace, location, company, distractions[],
+  // Depois
+  foodEaten, foodTypes[], emotionsAfter[], intensityAfter,
+  thoughtsAfter, compensatoryBehaviors[],
+  // Técnicas
+  usedTechnique, techniques[], techniqueEffectiveness
+}
+```
+
+**Arquivos a modificar:**
+- `index.html:1437` - Adicionar schema
+- `index.html:1441-1699` - Adicionar object store `foodCompulsion`
+- `index.html:1095` - Adicionar nova tab após Mindfulness
+- Criar funções após linha 2523
+
+**Complexidade:** 🔴 Muito Alta (módulo completo novo - 18h)
+
+**Justificativa da Prioridade Máxima:**
+1. ✅ Demanda baseada em sessão real de terapia
+2. ✅ Tarefa terapêutica ativa (psicóloga pediu auto-monitoramento)
+3. ✅ Usuário precisa começar a usar ESTA SEMANA
+4. ✅ Diferencial competitivo (poucos apps DBT têm isso)
+5. ✅ Integra-se com funcionalidades existentes
+
+**Estimativa:** 18 horas (6 fases de 2-4h cada)
+
+---
+
+### 🔴 Prioridade CRÍTICA (Implementar Após M0)
 
 #### M1: Visualização Detalhada dos Registros de Humor da Semana
 **Descrição:** Expandir o card "Humor da Semana" para mostrar:
@@ -323,6 +410,7 @@ function showNotification(message, type = 'info') {
 
 | Melhoria | Prioridade | Complexidade | Tempo Estimado | Impacto |
 |----------|-----------|--------------|----------------|---------|
+| **M0 - Módulo Compulsão Alimentar** 🆕 | 🔴🔴🔴 **MÁXIMA** | Muito Alta | 18h | **CRÍTICO** |
 | M1 - Histórico Detalhado de Humor | 🔴 Crítica | Média | 2-3h | Alto |
 | M2 - Completar Campos de Emoções | 🔴 Crítica | Baixa | 30min | Alto |
 | M3 - Editar Registros | 🟠 Alta | Alta | 4-6h | Alto |
@@ -336,9 +424,26 @@ function showNotification(message, type = 'info') {
 | M11 - Notificações Toast | 🔵 Baixa | Baixa | 1-2h | Baixo |
 | M12 - Lembretes Push | 🔵 Baixa | Média | 4h | Médio |
 
+**Total Estimado:** ~60h (todas as melhorias)
+
 ---
 
 ## 🎯 Sugestão de Implementação por Fases
+
+### **⚡ Fase 0: URGENTE - Tarefa Terapêutica** (Sprint 0 - 18h) 🆕
+✅ **M0 - Módulo Completo de Compulsão Alimentar**
+  - Fase 0.1: Estrutura base + formulário (4h)
+  - Fase 0.2: Visualizações e estatísticas (4h)
+  - Fase 0.3: Plano de ação (3h)
+  - Fase 0.4: Biblioteca educacional (2h)
+  - Fase 0.5: Integrações (3h)
+  - Fase 0.6: Polimento e testes (2h)
+
+**Resultado:** Usuário consegue cumprir tarefa terapêutica da semana (auto-monitoramento de compulsão alimentar)
+
+**Justificativa:** Demanda real e imediata baseada em sessão de terapia. Psicóloga pediu que começasse ESTA SEMANA.
+
+---
 
 ### **Fase 1: Correções Críticas** (Sprint 1 - 4h)
 ✅ M2 - Completar campos de emoções (30min)
@@ -429,14 +534,46 @@ function showNotification(message, type = 'info') {
 
 ## 🚀 Próximos Passos
 
-1. **Validar prioridades** com o usuário
-2. **Confirmar escopo** da Fase 1
-3. **Iniciar implementação** das melhorias críticas
-4. **Testar** e coletar feedback
-5. **Iterar** com base no uso real
+### **URGENTE - Esta Semana:**
+1. ✅ **Decidir sobre Fase 0** (Módulo de Compulsão Alimentar)
+   - ⚡ Implementar versão mínima funcional (MVP) para uso imediato? (6-8h)
+   - 📅 Ou implementar módulo completo gradualmente? (18h ao longo de 2-3 semanas)
+
+### **Sequência Recomendada:**
+
+**Opção A - Foco Total em Tarefa Terapêutica:**
+1. Implementar **M0 - Módulo de Compulsão** completo (18h)
+2. Depois implementar **Fase 1** (correções críticas - 4h)
+3. Seguir com fases 2-5
+
+**Opção B - MVP Rápido + Iteração:**
+1. Implementar **M0 - MVP** (diário básico + histórico - 6h)
+2. Implementar **Fase 1** (correções críticas - 4h)
+3. Completar **M0 completo** gradualmente
+4. Seguir com fases 2-5
+
+**Opção C - Correções Primeiro:**
+1. Implementar **Fase 1** (correções críticas - 4h)
+2. Implementar **M0 completo** (18h)
+3. Seguir com fases 2-5
+
+### **Ações Imediatas:**
+1. 🎯 **Validar prioridade do M0** com o usuário (URGENTE ou pode esperar?)
+2. 📋 **Confirmar escopo:** MVP ou módulo completo de uma vez?
+3. 🚀 **Iniciar implementação** da opção escolhida
+4. 🧪 **Testar** com dados reais
+5. 💬 **Coletar feedback** e iterar
+
+---
+
+## 📚 Documentação Relacionada
+
+- **PLANO_MELHORIAS.md** - Este documento (visão geral de todas as melhorias)
+- **MODULO_COMPULSAO_ALIMENTAR.md** - Especificação técnica detalhada do M0
 
 ---
 
 **Criado em:** 2025-11-12
-**Versão:** 1.0
+**Atualizado em:** 2025-11-12 (adicionado M0)
+**Versão:** 2.0
 **Autor:** Claude (Assistente IA)
